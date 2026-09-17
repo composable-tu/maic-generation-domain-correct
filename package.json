@@ -1,6 +1,6 @@
 {
-  "name": "maic-generation-domain-correct",
-  "version": "0.3.7",
+  "name": "@composable-tu/maic-generation-domain-correct",
+  "version": "0.0.1",
   "description": "Pure generation pipeline contracts and packaged prompt assets for MAIC consumers.",
   "type": "module",
   "main": "./dist/index.js",
@@ -39,8 +39,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/THU-MAIC/OpenMAIC",
-    "directory": "packages/@openmaic/generation"
+    "url": "https://github.com/composable-tu/maic-generation-domain-correct"
   },
   "dependencies": {
     "@openmaic/dsl": "^0.11.1",
@@ -51,8 +50,7 @@
     "partial-json": "^0.1.7"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public"
+    "registry": "https://npm.pkg.github.com"
   },
   "devDependencies": {
     "typescript": "^5",
