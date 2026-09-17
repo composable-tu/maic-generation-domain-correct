@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vite-plus/test";
 import {
+  buildOutlinePrompt,
   buildPrompt,
   generateSceneContent,
   generateSceneOutlinesFromRequirements,
@@ -21,7 +22,52 @@ function blueprintSlide(): SceneOutline {
 }
 
 describe("outline blueprint", () => {
-  it("preserves_blueprint_fields_from_model_output", async () => {
+  it("outline_prompt_demands_figures_verbatim", () => {
+    const prompts = buildOutlinePrompt(
+      { requirement: "讲解管理细则" },
+      { pdfText: "比率 3:1" },
+    );
+    expect(prompts.user).toContain("Figures verbatim");
+    expect(prompts.user).toContain("sourceQuotes");
+    expect(prompts.user).toContain("符合XX规范");
+    expect(prompts.user).toContain("不得超过 60℃");
+  });
+
+  it("outline_source_quotes_reach_the_judge", async () => {
+    let judgeUser = "";
+    const aiCall = vi
+      .fn<AICallFn>()
+      .mockResolvedValueOnce(
+        JSON.stringify({
+          elements: [
+            {
+              type: "text",
+              left: 0,
+              top: 0,
+              width: 100,
+              height: 50,
+              content: "Caller owns dependencies. Pure generation seam.",
+            },
+          ],
+        }),
+      )
+      .mockImplementationOnce(async (_system, user) => {
+        judgeUser = user;
+        return JSON.stringify({ issues: [] });
+      });
+
+    await generateSceneContent(
+      {
+        ...slideOutline(),
+        sourceQuotes: ["示例比率为 3:1。"],
+      },
+      aiCall,
+      { correction: { judgeEnabled: true } },
+    );
+
+    expect(aiCall).toHaveBeenCalledTimes(2);
+    expect(judgeUser).toContain("示例比率为 3:1。");
+  });  it("preserves_blueprint_fields_from_model_output", async () => {
     const outline = blueprintSlide();
     const aiCall: AICallFn = vi.fn(async () =>
       JSON.stringify({

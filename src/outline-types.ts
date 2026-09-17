@@ -95,6 +95,13 @@ export interface SceneOutline {
   transitionIn?: string;
   /** Quiz-only: which teaching points each question assesses, in order. */
   assessmentMap?: string[];
+  /**
+   * Verbatim passages from the source material this scene teaches.
+   * Travels inside the outline so downstream stages can ground on the
+   * original text without host plumbing; the correction loop consumes
+   * these as grounding excerpts automatically.
+   */
+  sourceQuotes?: string[];
   suggestedImageIds?: string[];
   mediaGenerations?: MediaGenerationRequest[];
   quizConfig?: {

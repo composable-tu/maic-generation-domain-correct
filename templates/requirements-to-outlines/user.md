@@ -72,6 +72,7 @@ Never return a bare array. Never omit `languageDirective` or `courseTitle`. All 
   "keyPoints": ["Point 1", "Point 2", "Point 3"],
   "teachingNarrative": "Tension hook, aha turn, then the term name",
   "mustCover": ["Concrete proposition with figures", "Standard or clause quoted verbatim"],
+  "sourceQuotes": ["Verbatim passage from the material this scene teaches"],
   "order": 1
 }
 ```
@@ -95,6 +96,8 @@ Each outline is a detailed design blueprint: `teachingNarrative` and `mustCover`
    - Select widgetType based on concept: simulation (physics/chem), diagram (processes), code (programming), game (practice), visualization3d (3D models)
    - Provide appropriate widgetOutline for the widget type
 - **Scene count**: Based on inferred duration, typically 1-2 scenes per minute. A dense topic with 5+ key points MUST become 2+ consecutive scenes — never compress it into one.
+- **Figures verbatim**: Copy every concrete figure from the material into `keyPoints` or `mustCover` exactly as written — ratios, headcounts, deadlines, titles, document numbers. NEVER paraphrase a valued item into "符合XX规范/标准/要求" without its value. Bad: "必须符合设备温度规范要求". Good: "液压站油温不得超过 60℃，电机绕组温度不得超过 120℃".
+- **Source quotes**: Each scene quotes 1-3 passages from the material verbatim into `sourceQuotes` — the exact sentences or figures it teaches. Quote, don't paraphrase; downstream stages check content against these quotes.
 - **Split demo**: A scene covering role A, role B, and assessment norms is NOT one scene — split by role, mechanism, or case into consecutive scenes with sequential titles. Split whenever one scene would cover two roles, two mechanisms, or two cases.
 - **Quiz placement**: Recommend inserting a quiz every 3-5 slides for assessment
 - **Language**: Infer from the user's requirement text and context, then output all content in the inferred language

@@ -94,7 +94,11 @@ export { verifySceneContent } from './correction/verify.js';
 export type { VerifySceneContentOptions, VerifiableContent } from './correction/verify.js';
 export { verifySceneActions } from './correction/verify-actions.js';
 export type { VerifySceneActionsOptions } from './correction/verify-actions.js';
-export { judgeSceneContent, synthesizeGroundingFromRequirements } from './correction/judge.js';
+export {
+  judgeSceneContent,
+  resolveSceneGrounding,
+  synthesizeGroundingFromRequirements,
+} from './correction/judge.js';
 export type { JudgeSceneContentOptions, JudgeSceneContentResult } from './correction/judge.js';
 export { buildRepairPrompt, repairSceneContent } from './correction/repair.js';
 export type { RepairSceneContentArgs, RepairSceneContentResult } from './correction/repair.js';

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vite-plus/test";
 import {
   judgeSceneContent,
+  resolveSceneGrounding,
   synthesizeGroundingFromRequirements,
   type AICallFn,
   type GeneratedSlideContent,
@@ -100,5 +101,32 @@ describe("synthesizeGroundingFromRequirements", () => {
   it("returns_undefined_without_requirement_text", () => {
     expect(synthesizeGroundingFromRequirements(undefined)).toBeUndefined();
     expect(synthesizeGroundingFromRequirements({ requirement: "   " })).toBeUndefined();
+  });
+});
+
+describe("resolveSceneGrounding", () => {
+  const outline = slideOutline();
+
+  it("explicit_grounding_wins", () => {
+    const grounding = { excerpts: ["Explicit."] };
+    expect(
+      resolveSceneGrounding(
+        { ...outline, sourceQuotes: ["Quoted."] },
+        { grounding, userRequirements: { requirement: "Asked." } },
+      ),
+    ).toBe(grounding);
+  });
+
+  it("combines_quotes_with_requirement_fallback", () => {
+    expect(
+      resolveSceneGrounding(
+        { ...outline, sourceQuotes: ["Quoted."] },
+        { userRequirements: { requirement: "Asked." } },
+      ),
+    ).toEqual({ excerpts: ["Quoted.", "Asked."] });
+  });
+
+  it("returns_undefined_without_any_material", () => {
+    expect(resolveSceneGrounding(outline, {})).toBeUndefined();
   });
 });

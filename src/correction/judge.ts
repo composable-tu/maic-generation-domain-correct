@@ -52,6 +52,24 @@ export function synthesizeGroundingFromRequirements(
 }
 
 /**
+ * Resolve the grounding for one scene: explicit grounding wins, otherwise
+ * the outline's verbatim source quotes, then the requirement text.
+ * Outlines travel through the host opaquely, so quotes attached at outline
+ * time reach Stage 2 with no host plumbing.
+ */
+export function resolveSceneGrounding(
+  outline: SceneOutline,
+  options?: { grounding?: SourceGrounding; userRequirements?: UserRequirements },
+): SourceGrounding | undefined {
+  if (options?.grounding) return options.grounding;
+  const excerpts = (outline.sourceQuotes ?? []).map((s) => s.trim()).filter(Boolean);
+  const requirement = options?.userRequirements?.requirement?.trim();
+  if (requirement) excerpts.push(requirement);
+  if (excerpts.length === 0) return undefined;
+  return { excerpts };
+}
+
+/**
  * Review content against source excerpts. Synchronous skip when there is
  * nothing to check against; otherwise one model call.
  */

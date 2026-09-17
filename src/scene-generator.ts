@@ -56,7 +56,7 @@ import type {
 import { noopGenerationLogger, type GenerationLogger } from './logger.js';
 import { isAbortError } from './generation-retry.js';
 import { buildRepairPrompt, repairSceneContent } from './correction/repair.js';
-import { judgeSceneContent, synthesizeGroundingFromRequirements } from './correction/judge.js';
+import { judgeSceneContent, resolveSceneGrounding } from './correction/judge.js';
 import { verifySceneContent } from './correction/verify.js';
 import { verifySceneActions } from './correction/verify-actions.js';
 import type {
@@ -287,11 +287,9 @@ export async function generateSceneContent(
   let judgeIssues: CorrectionIssue[] = [];
   let judgeSkipped = true;
   let attempts = 1;
-  // Explicit grounding wins; otherwise fall back to the requirement text the
-  // host already forwards, so the judge has domain material without any
-  // host-side change.
-  const grounding =
-    options.grounding ?? synthesizeGroundingFromRequirements(options.userRequirements);
+  // Explicit grounding wins; otherwise fall back to the outline's verbatim
+  // source quotes, then the requirement text — all without host changes.
+  const grounding = resolveSceneGrounding(outline, options);
   // The judge runs whenever it has material to check against, unless
   // explicitly disabled. `judgeSceneContent` itself skips (zero calls) when
   // no excerpts exist, so callers without domain material pay nothing.

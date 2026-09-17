@@ -87,6 +87,7 @@ An outline is a detailed design blueprint, not a heading list. Every scene carri
 - **exampleCase** (optional): the example or case this scene uses; prefer the course running example.
 - **transitionIn** (optional): handoff line from the previous scene (omit on the first scene).
 - **assessmentMap** (quiz only): which teaching point each question assesses, in question order.
+- **sourceQuotes** (optional): 1-3 passages quoted verbatim from the material — the exact sentences or figures this scene teaches. Quote, don't paraphrase.
 
 ---
 
@@ -319,11 +320,12 @@ Rules:
 | description       | string                   | ✅       | 1-2 sentences describing teaching purpose                                                        |
 | keyPoints         | string[]                 | ✅       | 2-4 core points; a topic needing more becomes consecutive scenes, not a longer list |
 | teachingNarrative | string                   | ✅       | One-sentence narrative script (tension hook → aha turn → term naming)                |
-| mustCover         | string[]                 | ✅       | Must-teach propositions, quoted concretely                                          |
+| mustCover         | string[]                 | ✅       | Must-teach propositions, figures quoted verbatim, never paraphrased               |
 | misconceptions    | string[]                 | ❌       | Anticipated misconceptions with decidable criteria                                  |
 | exampleCase       | string                   | ❌       | Example or case used by this scene                                                  |
 | transitionIn      | string                   | ❌       | Handoff line from the previous scene                                                |
 | assessmentMap     | string[]                 | ❌ (quiz) | Teaching point each question assesses, in order                                     |
+| sourceQuotes      | string[]                 | ❌       | Verbatim material passages this scene teaches                                       |
 | teachingObjective | string                   | ❌       | Corresponding learning objective                                                                 |
 | estimatedDuration | number                   | ✅       | Per-scene seconds; all scenes roughly sum to the course duration                                 |
 | order             | number                   | ✅       | Sort order, starting from 1                                                                      |
