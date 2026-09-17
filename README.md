@@ -30,7 +30,17 @@ git checkout v1.0.3
 }
 ```
 
-### 3. 重新安装并确认
+### 3. 指定包来源并安装
+
+在 OpenMAIC 根目录建 `.npmrc`：
+
+```
+@composable-tu:registry=https://npm.pkg.github.com
+
+//npm.pkg.github.com/:_authToken=你的 GitHub Personal Token（Classic）
+```
+
+然后重新安装并确认：
 
 ```bash
 pnpm install
