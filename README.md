@@ -93,6 +93,8 @@ OpenMAIC 生成器流水线的领域纠偏改造。
 
 ## 使用方法
 
+该纠偏包目前仅在 OpenMAIC v1.0.3 上做了验证，其他版本未测试。
+
 ### 1. 克隆 OpenMAIC
 
 ```bash
@@ -135,3 +137,5 @@ pnpm why @openmaic/generation
 `pnpm why` 应显示实际安装的是 `@composable-tu/maic-generation-domain-correct@x.y.z`。之后正常启动 OpenMAIC 即可；别名换上后纠偏环默认开启，无需改任何调用代码。如需关闭，调用时传 `correction: { enabled: false }` 即回到单遍生成。
 
 > 也可以直接克隆 `composable-tu/OpenMAIC` 的（`domain-correct`）分支：https://github.com/composable-tu/OpenMAIC/tree/domain-correct
+> 
+> 该分支不一定随 OpenMAIC 上游同步更新，请留意。
