@@ -78,6 +78,8 @@ Produce a **\`courseTitle\`** (required): a concise, human-readable name for the
 - **Logical Flow**: Scenes form a natural teaching progression
 - **Experience Design**: Consider learning experience and emotional response from the student's perspective
 - **One scene, one idea**: Each scene teaches 1-2 key points in 1-3 minutes. When a topic carries more points, split it into consecutive scenes with sequential titles instead of cramming. Never merge distinct mechanisms, cases, or steps into one scene to save pages.
+- **Scope test**: A key point naming two mechanisms, two roles, or two cases is two scenes, not one. If a bullet needs "和/与/及" to join distinct topics, split it.
+- **Duration Control**: Each scene should be 1-3 minutes (PBL scenes are longer, typically 15-30 minutes). Every scene must state \`estimatedDuration\` in seconds; all scenes must roughly sum to the total course duration.
 
 ### Scene Blueprint Fields
 
@@ -321,7 +323,7 @@ Rules:
 | transitionIn      | string                   | ❌       | Handoff line from the previous scene                                                |
 | assessmentMap     | string[]                 | ❌ (quiz) | Teaching point each question assesses, in order                                     |
 | teachingObjective | string                   | ❌       | Corresponding learning objective                                                                 |
-| estimatedDuration | number                   | ❌       | Estimated duration (seconds)                                                                     |
+| estimatedDuration | number                   | ✅       | Per-scene seconds; all scenes roughly sum to the course duration                                 |
 | order             | number                   | ✅       | Sort order, starting from 1                                                                      |
 
 
@@ -493,6 +495,7 @@ Each outline is a detailed design blueprint: \`teachingNarrative\` and \`mustCov
    - Select widgetType based on concept: simulation (physics/chem), diagram (processes), code (programming), game (practice), visualization3d (3D models)
    - Provide appropriate widgetOutline for the widget type
 - **Scene count**: Based on inferred duration, typically 1-2 scenes per minute. A dense topic with 5+ key points MUST become 2+ consecutive scenes — never compress it into one.
+- **Split demo**: A scene covering role A, role B, and assessment norms is NOT one scene — split by role, mechanism, or case into consecutive scenes with sequential titles. Split whenever one scene would cover two roles, two mechanisms, or two cases.
 - **Quiz placement**: Recommend inserting a quiz every 3-5 slides for assessment
 - **Language**: Infer from the user's requirement text and context, then output all content in the inferred language
 - **If web search results are provided**, reference specific findings and sources in scene descriptions and keyPoints. The search results provide up-to-date information — incorporate it to make the course content current and accurate. Write only the adopted conclusions; do not list discarded results.
@@ -579,6 +582,8 @@ Produce a **\`courseTitle\`** (required): a concise, human-readable name for the
 - **Logical Flow**: Scenes form a natural teaching progression
 - **Experience Design**: Consider learning experience and emotional response from the student's perspective
 - **One scene, one idea**: Each scene teaches 1-2 key points in 1-3 minutes. When a topic carries more points, split it into consecutive scenes with sequential titles instead of cramming. Never merge distinct mechanisms, cases, or steps into one scene to save pages.
+- **Scope test**: A key point naming two mechanisms, two roles, or two cases is two scenes, not one. If a bullet needs "和/与/及" to join distinct topics, split it.
+- **Duration Control**: Each scene should be 1-3 minutes (PBL scenes are longer, typically 15-30 minutes). Every scene must state \`estimatedDuration\` in seconds; all scenes must roughly sum to the total course duration.
 
 ### Scene Blueprint Fields
 
@@ -888,7 +893,7 @@ Rules:
 | transitionIn      | string                   | ❌       | Handoff line from the previous scene                                                |
 | assessmentMap     | string[]                 | ❌ (quiz) | Teaching point each question assesses, in order                                     |
 | teachingObjective | string                   | ❌       | Corresponding learning objective                                                                 |
-| estimatedDuration | number                   | ❌       | Estimated duration (seconds)                                                                     |
+| estimatedDuration | number                   | ✅       | Per-scene seconds; all scenes roughly sum to the course duration                                 |
 | order             | number                   | ✅       | Sort order, starting from 1                                                                      |
 
 | suggestedImageIds | string[]                 | ❌       | Suggested image IDs to use                                                                       |
@@ -1073,6 +1078,7 @@ Each outline is a detailed design blueprint: \`teachingNarrative\` and \`mustCov
    - Select widgetType based on concept: simulation (physics/chem), diagram (processes), code (programming), game (practice), visualization3d (3D models)
    - Provide appropriate widgetOutline for the widget type
 - **Scene count**: Based on inferred duration, typically 1-2 scenes per minute. A dense topic with 5+ key points MUST become 2+ consecutive scenes — never compress it into one.
+- **Split demo**: A scene covering role A, role B, and assessment norms is NOT one scene — split by role, mechanism, or case into consecutive scenes with sequential titles. Split whenever one scene would cover two roles, two mechanisms, or two cases.
 - **Quiz placement**: Recommend inserting a quiz every 3-5 slides for assessment
 - **Language**: Infer from the user's requirement text and context, then output all content in the inferred language
 - **If web search results are provided**, reference specific findings and sources in scene descriptions and keyPoints. The search results provide up-to-date information — incorporate it to make the course content current and accurate. Write only the adopted conclusions; do not list discarded results.
@@ -1159,6 +1165,8 @@ Produce a **\`courseTitle\`** (required): a concise, human-readable name for the
 - **Logical Flow**: Scenes form a natural teaching progression
 - **Experience Design**: Consider learning experience and emotional response from the student's perspective
 - **One scene, one idea**: Each scene teaches 1-2 key points in 1-3 minutes. When a topic carries more points, split it into consecutive scenes with sequential titles instead of cramming. Never merge distinct mechanisms, cases, or steps into one scene to save pages.
+- **Scope test**: A key point naming two mechanisms, two roles, or two cases is two scenes, not one. If a bullet needs "和/与/及" to join distinct topics, split it.
+- **Duration Control**: Each scene should be 1-3 minutes (PBL scenes are longer, typically 15-30 minutes). Every scene must state \`estimatedDuration\` in seconds; all scenes must roughly sum to the total course duration.
 
 ### Scene Blueprint Fields
 
@@ -1441,7 +1449,7 @@ Rules:
 | transitionIn      | string                   | ❌       | Handoff line from the previous scene                                                |
 | assessmentMap     | string[]                 | ❌ (quiz) | Teaching point each question assesses, in order                                     |
 | teachingObjective | string                   | ❌       | Corresponding learning objective                                                                 |
-| estimatedDuration | number                   | ❌       | Estimated duration (seconds)                                                                     |
+| estimatedDuration | number                   | ✅       | Per-scene seconds; all scenes roughly sum to the course duration                                 |
 | order             | number                   | ✅       | Sort order, starting from 1                                                                      |
 
 
@@ -1615,6 +1623,7 @@ Each outline is a detailed design blueprint: \`teachingNarrative\` and \`mustCov
    - Select widgetType based on concept: simulation (physics/chem), diagram (processes), code (programming), game (practice), visualization3d (3D models)
    - Provide appropriate widgetOutline for the widget type
 - **Scene count**: Based on inferred duration, typically 1-2 scenes per minute. A dense topic with 5+ key points MUST become 2+ consecutive scenes — never compress it into one.
+- **Split demo**: A scene covering role A, role B, and assessment norms is NOT one scene — split by role, mechanism, or case into consecutive scenes with sequential titles. Split whenever one scene would cover two roles, two mechanisms, or two cases.
 - **Quiz placement**: Recommend inserting a quiz every 3-5 slides for assessment
 - **Language**: Infer from the user's requirement text and context, then output all content in the inferred language
 - **If web search results are provided**, reference specific findings and sources in scene descriptions and keyPoints. The search results provide up-to-date information — incorporate it to make the course content current and accurate. Write only the adopted conclusions; do not list discarded results.
@@ -1701,6 +1710,8 @@ Produce a **\`courseTitle\`** (required): a concise, human-readable name for the
 - **Logical Flow**: Scenes form a natural teaching progression
 - **Experience Design**: Consider learning experience and emotional response from the student's perspective
 - **One scene, one idea**: Each scene teaches 1-2 key points in 1-3 minutes. When a topic carries more points, split it into consecutive scenes with sequential titles instead of cramming. Never merge distinct mechanisms, cases, or steps into one scene to save pages.
+- **Scope test**: A key point naming two mechanisms, two roles, or two cases is two scenes, not one. If a bullet needs "和/与/及" to join distinct topics, split it.
+- **Duration Control**: Each scene should be 1-3 minutes (PBL scenes are longer, typically 15-30 minutes). Every scene must state \`estimatedDuration\` in seconds; all scenes must roughly sum to the total course duration.
 
 ### Scene Blueprint Fields
 
@@ -1944,7 +1955,7 @@ Rules:
 | transitionIn      | string                   | ❌       | Handoff line from the previous scene                                                |
 | assessmentMap     | string[]                 | ❌ (quiz) | Teaching point each question assesses, in order                                     |
 | teachingObjective | string                   | ❌       | Corresponding learning objective                                                                 |
-| estimatedDuration | number                   | ❌       | Estimated duration (seconds)                                                                     |
+| estimatedDuration | number                   | ✅       | Per-scene seconds; all scenes roughly sum to the course duration                                 |
 | order             | number                   | ✅       | Sort order, starting from 1                                                                      |
 
 | suggestedImageIds | string[]                 | ❌       | Suggested image IDs to use                                                                       |
@@ -2120,6 +2131,7 @@ Each outline is a detailed design blueprint: \`teachingNarrative\` and \`mustCov
    - Select widgetType based on concept: simulation (physics/chem), diagram (processes), code (programming), game (practice), visualization3d (3D models)
    - Provide appropriate widgetOutline for the widget type
 - **Scene count**: Based on inferred duration, typically 1-2 scenes per minute. A dense topic with 5+ key points MUST become 2+ consecutive scenes — never compress it into one.
+- **Split demo**: A scene covering role A, role B, and assessment norms is NOT one scene — split by role, mechanism, or case into consecutive scenes with sequential titles. Split whenever one scene would cover two roles, two mechanisms, or two cases.
 - **Quiz placement**: Recommend inserting a quiz every 3-5 slides for assessment
 - **Language**: Infer from the user's requirement text and context, then output all content in the inferred language
 - **If web search results are provided**, reference specific findings and sources in scene descriptions and keyPoints. The search results provide up-to-date information — incorporate it to make the course content current and accurate. Write only the adopted conclusions; do not list discarded results.

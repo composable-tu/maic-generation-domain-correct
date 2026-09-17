@@ -74,6 +74,8 @@ Produce a **`courseTitle`** (required): a concise, human-readable name for the *
 - **Logical Flow**: Scenes form a natural teaching progression
 - **Experience Design**: Consider learning experience and emotional response from the student's perspective
 - **One scene, one idea**: Each scene teaches 1-2 key points in 1-3 minutes. When a topic carries more points, split it into consecutive scenes with sequential titles instead of cramming. Never merge distinct mechanisms, cases, or steps into one scene to save pages.
+- **Scope test**: A key point naming two mechanisms, two roles, or two cases is two scenes, not one. If a bullet needs "和/与/及" to join distinct topics, split it.
+- **Duration Control**: Each scene should be 1-3 minutes (PBL scenes are longer, typically 15-30 minutes). Every scene must state `estimatedDuration` in seconds; all scenes must roughly sum to the total course duration.
 
 ### Scene Blueprint Fields
 
@@ -323,7 +325,7 @@ Rules:
 | transitionIn      | string                   | ❌       | Handoff line from the previous scene                                                |
 | assessmentMap     | string[]                 | ❌ (quiz) | Teaching point each question assesses, in order                                     |
 | teachingObjective | string                   | ❌       | Corresponding learning objective                                                                 |
-| estimatedDuration | number                   | ❌       | Estimated duration (seconds)                                                                     |
+| estimatedDuration | number                   | ✅       | Per-scene seconds; all scenes roughly sum to the course duration                                 |
 | order             | number                   | ✅       | Sort order, starting from 1                                                                      |
 {{#if hasSourceImages}}
 | suggestedImageIds | string[]                 | ❌       | Suggested image IDs to use                                                                       |

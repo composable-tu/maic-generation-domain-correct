@@ -95,6 +95,7 @@ Each outline is a detailed design blueprint: `teachingNarrative` and `mustCover`
    - Select widgetType based on concept: simulation (physics/chem), diagram (processes), code (programming), game (practice), visualization3d (3D models)
    - Provide appropriate widgetOutline for the widget type
 - **Scene count**: Based on inferred duration, typically 1-2 scenes per minute. A dense topic with 5+ key points MUST become 2+ consecutive scenes — never compress it into one.
+- **Split demo**: A scene covering role A, role B, and assessment norms is NOT one scene — split by role, mechanism, or case into consecutive scenes with sequential titles. Split whenever one scene would cover two roles, two mechanisms, or two cases.
 - **Quiz placement**: Recommend inserting a quiz every 3-5 slides for assessment
 - **Language**: Infer from the user's requirement text and context, then output all content in the inferred language
 - **If web search results are provided**, reference specific findings and sources in scene descriptions and keyPoints. The search results provide up-to-date information — incorporate it to make the course content current and accurate. Write only the adopted conclusions; do not list discarded results.
