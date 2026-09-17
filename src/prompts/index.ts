@@ -24,4 +24,5 @@ export const PROMPT_IDS = {
   QUIZ_ACTIONS: 'quiz-actions',
   INTERACTIVE_ACTIONS: 'interactive-actions',
   PBL_ACTIONS: 'pbl-actions',
+  CORRECTION_JUDGE: 'correction-judge',
 } as const satisfies Record<string, PromptId>;

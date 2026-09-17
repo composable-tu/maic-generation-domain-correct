@@ -90,6 +90,20 @@ export { partitionImagesForVision } from './outline-formatters.js';
 export type { VisionImagePartition } from './outline-formatters.js';
 export { parseJsonResponse } from './json-repair.js';
 export type { JsonParsingOptions } from './json-repair.js';
+export { verifySceneContent } from './correction/verify.js';
+export type { VerifySceneContentOptions, VerifiableContent } from './correction/verify.js';
+export { judgeSceneContent } from './correction/judge.js';
+export type { JudgeSceneContentOptions, JudgeSceneContentResult } from './correction/judge.js';
+export { buildRepairPrompt, repairSceneContent } from './correction/repair.js';
+export type { RepairSceneContentArgs, RepairSceneContentResult } from './correction/repair.js';
+export type {
+  CorrectionIssue,
+  CorrectionIssueKind,
+  CorrectionOptions,
+  CorrectionReport,
+  SourceGrounding,
+  VerificationReport,
+} from './correction/types.js';
 export { noopGenerationLogger } from './logger.js';
 export type { GenerationLogger } from './logger.js';
 export {

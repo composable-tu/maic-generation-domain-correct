@@ -1,5 +1,5 @@
 {
-  "name": "@openmaic/generation",
+  "name": "maic-generation-domain-correct",
   "version": "0.3.7",
   "description": "Pure generation pipeline contracts and packaged prompt assets for MAIC consumers.",
   "type": "module",

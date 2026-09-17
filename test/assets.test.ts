@@ -26,6 +26,7 @@ const PROMPT_IDS = [
   "quiz-actions",
   "interactive-actions",
   "pbl-actions",
+  "correction-judge",
 ] as const;
 
 const SNIPPET_IDS = [

@@ -16,7 +16,8 @@ export type PromptId =
   | 'slide-actions'
   | 'quiz-actions'
   | 'interactive-actions'
-  | 'pbl-actions';
+  | 'pbl-actions'
+  | 'correction-judge';
 
 /** Snippets referenced by generation-owned prompt templates. */
 export type SnippetId =

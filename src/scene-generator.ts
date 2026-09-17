@@ -55,6 +55,14 @@ import type {
 } from './pipeline-types.js';
 import { noopGenerationLogger, type GenerationLogger } from './logger.js';
 import { isAbortError } from './generation-retry.js';
+import { buildRepairPrompt, repairSceneContent } from './correction/repair.js';
+import { judgeSceneContent } from './correction/judge.js';
+import { verifySceneContent } from './correction/verify.js';
+import type {
+  CorrectionIssue,
+  CorrectionOptions,
+  SourceGrounding,
+} from './correction/types.js';
 import { generatePBLV2ProjectSingleCall } from './pbl/planner-single-call.js';
 import { PlannerV2Error } from './pbl/planner-core.js';
 import type { PBLPlannerV2Input } from './pbl/types.js';
@@ -114,6 +122,14 @@ export interface SceneContentOptions {
   baselineContent?: GeneratedSlideContent;
   /** Optional host fallback for the app-only loop planner. */
   pblLoopFallback?: (input: PBLPlannerV2Input) => Promise<PBLProject>;
+  /**
+   * Domain material the correction loop may consult (excerpts, glossary,
+   * domain instructions). Absent = outline-only checks. Passing it (or
+   * `correction`) activates the correction loop.
+   */
+  grounding?: SourceGrounding;
+  /** Knobs for the correction loop. Absent = single-pass generation without verification. */
+  correction?: CorrectionOptions;
   onFailure?: (failure: SceneContentFailure) => void;
   logger?: GenerationLogger;
 }
@@ -224,10 +240,93 @@ function buildWidgetOutline(
 /**
  * Step 3.1: Generate content based on outline
  */
+/**
+ * Generate scene content with the correction loop.
+ *
+ * Runs one generation pass, then — only when the caller passes
+ * `correction` or `grounding` — verifies (rule layer), optionally judges
+ * (model review against excerpts), and repairs (bounded regeneration).
+ * Without the new options the prompts and return contract match an
+ * uncorrected call exactly.
+ * Correction never converts success into failure: worst case it returns
+ * the initial content and reports the remaining issues via `onCorrection`.
+ */
 export async function generateSceneContent(
   outline: SceneOutline,
   aiCall: AICallFn,
   options: SceneContentOptions = {},
+): Promise<
+  | GeneratedSlideContent
+  | GeneratedQuizContent
+  | GeneratedInteractiveContent
+  | GeneratedPBLContent
+  | null
+> {
+  const correction = options.correction;
+  const loopActive =
+    correction?.enabled !== false && (correction !== undefined || options.grounding !== undefined);
+
+  const initial = await runGenerationPass(outline, aiCall, options);
+  if (!loopActive || !initial) return initial;
+
+  const log = options.logger ?? noopGenerationLogger;
+  const ruleContext = {
+    imageMapping: options.imageMapping,
+    assignedImages: options.assignedImages,
+    logger: log,
+  };
+  const ruleIssues = verifySceneContent(outline, initial, ruleContext).issues;
+
+  let judgeIssues: CorrectionIssue[] = [];
+  let judgeSkipped = true;
+  let attempts = 1;
+  if (correction?.judgeEnabled) {
+    const judged = await judgeSceneContent(outline, initial, aiCall, {
+      grounding: options.grounding,
+      logger: log,
+    });
+    judgeSkipped = judged.skipped;
+    judgeIssues = judged.issues;
+    if (!judged.skipped) attempts += 1;
+  }
+
+  const allIssues = [...ruleIssues, ...judgeIssues];
+  let content = initial;
+  let repairs = 0;
+  let remaining = allIssues;
+  // PBL carries its own single-call retry inside the planner; the loop
+  // verifies and reports PBL output but never replays the whole project.
+  if (allIssues.length > 0 && outline.type !== 'pbl') {
+    const repaired = await repairSceneContent({
+      initial,
+      issues: allIssues,
+      regenerate: (found) =>
+        runGenerationPass(outline, aiCall, options, buildRepairPrompt(found)),
+      verify: (candidate) => verifySceneContent(outline, candidate, ruleContext).issues,
+      maxRepairs: correction?.maxRepairs ?? 1,
+      logger: log,
+    });
+    content = repaired.content;
+    repairs = repaired.repairs;
+    remaining = repaired.remainingIssues;
+  }
+  attempts += repairs;
+
+  correction?.onCorrection?.({
+    repaired: repairs > 0 && remaining.length === 0,
+    attempts,
+    ruleIssues: remaining,
+    judgeIssues,
+    judgeSkipped,
+  });
+  return content;
+}
+
+async function runGenerationPass(
+  outline: SceneOutline,
+  aiCall: AICallFn,
+  options: SceneContentOptions = {},
+  repairBlock?: string,
 ): Promise<
   | GeneratedSlideContent
   | GeneratedQuizContent
@@ -276,6 +375,7 @@ export async function generateSceneContent(
       allowProceduralSkill,
       logger: log,
       onFailure: options.onFailure,
+      repairBlock,
     });
   }
 
@@ -295,9 +395,10 @@ export async function generateSceneContent(
         baselineContent,
         log,
         options.onFailure,
+        repairBlock,
       );
     case 'quiz':
-      return generateQuizContent(outline, aiCall, languageDirective, log, options.onFailure);
+      return generateQuizContent(outline, aiCall, languageDirective, log, options.onFailure, repairBlock);
     case 'pbl':
       return generatePBLSceneContent(
         outline,
@@ -613,6 +714,7 @@ async function generateSlideContent(
   baselineContent?: GeneratedSlideContent,
   log: GenerationLogger = noopGenerationLogger,
   onFailure?: (failure: SceneContentFailure) => void,
+  repairBlock?: string,
 ): Promise<GeneratedSlideContent | null> {
   // Build assigned images description for the prompt
   let assignedImagesText = '无可用图片，禁止插入任何 image 元素';
@@ -771,7 +873,7 @@ async function generateSlideContent(
       `Return the full updated slide content in the same schema.`;
   }
 
-  const response = await aiCall(prompts.system, userPrompt, visionImages);
+  const response = await aiCall(prompts.system, userPrompt + (repairBlock ?? ''), visionImages);
   const generatedData = parseJsonResponse<GeneratedSlideData>(response);
 
   if (!generatedData || !generatedData.elements || !Array.isArray(generatedData.elements)) {
@@ -857,6 +959,7 @@ async function generateQuizContent(
   languageDirective?: string,
   log: GenerationLogger = noopGenerationLogger,
   onFailure?: (failure: SceneContentFailure) => void,
+  repairBlock?: string,
 ): Promise<GeneratedQuizContent | null> {
   const quizConfig = outline.quizConfig || {
     questionCount: 3,
@@ -880,7 +983,7 @@ async function generateQuizContent(
   }
 
   log.debug(`Generating quiz content for: ${outline.title}`);
-  const response = await aiCall(prompts.system, prompts.user);
+  const response = await aiCall(prompts.system, prompts.user + (repairBlock ?? ''));
   const generatedQuestions = parseJsonResponse<QuizQuestion[]>(response);
 
   if (!generatedQuestions || !Array.isArray(generatedQuestions)) {
@@ -1152,6 +1255,8 @@ export async function generateWidgetContent(
     allowProceduralSkill?: boolean;
     logger?: GenerationLogger;
     onFailure?: (failure: SceneContentFailure) => void;
+    /** Correction repair block appended to the widget prompt on rework. */
+    repairBlock?: string;
   } = {},
 ): Promise<GeneratedInteractiveContent | null> {
   const log = options.logger ?? noopGenerationLogger;
@@ -1269,7 +1374,7 @@ export async function generateWidgetContent(
   }
 
   log.info(`Generating ${widgetType} widget for: ${outline.title}`);
-  const response = await aiCall(prompts.system, prompts.user);
+  const response = await aiCall(prompts.system, prompts.user + (options.repairBlock ?? ''));
   const html = extractHtml(response, log);
 
   if (!html) {
