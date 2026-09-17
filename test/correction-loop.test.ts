@@ -90,7 +90,8 @@ describe("correction loop integration", () => {
           issues: [{ claim: "The package selects the model", reason: "Excerpt says the caller does" }],
         }),
       )
-      .mockResolvedValue(slideResponse(COVERING_TEXT));
+      .mockResolvedValueOnce(slideResponse(COVERING_TEXT))
+      .mockResolvedValue(JSON.stringify({ issues: [] }));
     const reports: CorrectionReport[] = [];
 
     const content = await generateSceneContent(slideOutline(), aiCall, {
@@ -99,12 +100,49 @@ describe("correction loop integration", () => {
     });
 
     expect(content).toMatchObject({ elements: expect.any(Array) });
-    expect(aiCall).toHaveBeenCalledTimes(3);
+    expect(aiCall).toHaveBeenCalledTimes(4);
     expect(aiCall.mock.calls[1][0]).toContain("fact-checker");
     expect(aiCall.mock.calls[2][1]).toContain("had these problems");
+    expect(aiCall.mock.calls[3][0]).toContain("fact-checker");
     expect(reports).toHaveLength(1);
+    // Closed loop: the re-judge after repair came back clean; the round
+    // that triggered the repair stays in the cumulative record.
     expect(reports[0]?.judgeIssues).toHaveLength(1);
-    expect(reports[0]).toMatchObject({ attempts: 3, judgeSkipped: false });
+    expect(reports[0]).toMatchObject({ attempts: 4, repaired: true, judgeSkipped: false });
+  });
+
+  it("rejudge_catches_new_error_introduced_by_repair", async () => {
+    const aiCall = vi
+      .fn<AICallFn>()
+      .mockResolvedValueOnce(slideResponse(COVERING_TEXT))
+      .mockResolvedValueOnce(
+        JSON.stringify({
+          issues: [{ claim: "First wrong claim", reason: "Excerpt contradicts it" }],
+        }),
+      )
+      .mockResolvedValueOnce(slideResponse(COVERING_TEXT))
+      .mockResolvedValue(
+        JSON.stringify({
+          issues: [{ claim: "Second wrong claim", reason: "Still not in the excerpts" }],
+        }),
+      );
+    const reports: CorrectionReport[] = [];
+
+    const content = await generateSceneContent(slideOutline(), aiCall, {
+      grounding: { excerpts: ["The caller owns model routing."] },
+      correction: { judgeEnabled: true, onCorrection: (r) => reports.push(r) },
+    });
+
+    // Rule-clean but factually flagged: returned (never null), reported honestly.
+    expect(content).toMatchObject({ elements: expect.any(Array) });
+    expect(aiCall).toHaveBeenCalledTimes(4);
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.judgeIssues).toHaveLength(2);
+    expect(reports[0]?.judgeIssues[1]).toMatchObject({
+      kind: "factual-deviation",
+      detail: expect.stringContaining("Second wrong claim"),
+    });
+    expect(reports[0]).toMatchObject({ attempts: 4, repaired: false, judgeSkipped: false });
   });
 
   it("pbl_gets_verified_and_reported_without_repair", async () => {

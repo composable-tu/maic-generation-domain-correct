@@ -82,7 +82,7 @@ Produce a **`courseTitle`** (required): a concise, human-readable name for the *
 An outline is a detailed design blueprint, not a heading list. Every scene carries its teaching decisions so the content stage executes instead of inventing:
 
 - **teachingNarrative** (required): one-sentence narrative script — tension hook → aha turn → term naming.
-- **mustCover** (required): must-teach propositions quoted concretely (figures, standards, clauses from the material).
+- **mustCover** (required): must-teach propositions quoted concretely (figures, standards, clauses from the material). Each item needs a supporting `sourceQuotes` passage.
 - **misconceptions** (optional): anticipated misconceptions, each paired with its decidable criterion.
 - **exampleCase** (optional): the example or case this scene uses; prefer the course running example.
 - **transitionIn** (optional): handoff line from the previous scene (omit on the first scene).

@@ -55,7 +55,7 @@ import type {
 } from './pipeline-types.js';
 import { noopGenerationLogger, type GenerationLogger } from './logger.js';
 import { isAbortError } from './generation-retry.js';
-import { buildRepairPrompt, repairSceneContent } from './correction/repair.js';
+import { buildRepairPrompt } from './correction/repair.js';
 import { judgeSceneContent, resolveSceneGrounding } from './correction/judge.js';
 import { verifySceneContent } from './correction/verify.js';
 import { verifySceneActions } from './correction/verify-actions.js';
@@ -251,9 +251,15 @@ function buildWidgetOutline(
  *
  * Runs one generation pass, then verifies (rule layer), judges (model
  * review against excerpts when material exists), and repairs (bounded
- * regeneration). The loop is on by default — plain alias swaps get the
+ * regeneration). The loop is closed: every repair is re-verified AND
+ * re-judged until clean or the budget runs out, so a repair that
+ * introduces a new factual error is caught instead of passing on
+ * rule-cleanliness alone.
+ * The loop is on by default — plain alias swaps get the
  * correction with no caller change. `correction: { enabled: false }`
  * selects the bare single pass.
+ * Worst-case model calls per scene: 1 (gen) + 1 (judge) + maxRepairs × 2
+ * (repair + re-judge); default maxRepairs 1 → at most 4, typically 1-2.
  * Correction never converts success into failure — with one exception:
  * unreadable text (mojibake) that survives every repair returns null so the
  * host routes the scene into its retry flow instead of showing garbage to
@@ -296,44 +302,51 @@ export async function generateSceneContent(
   // The judge runs whenever it has material to check against, unless
   // explicitly disabled. `judgeSceneContent` itself skips (zero calls) when
   // no excerpts exist, so callers without domain material pay nothing.
-  if (correction?.judgeEnabled !== false) {
-    const judged = await judgeSceneContent(outline, initial, aiCall, {
+  const runJudge = async (candidate: typeof content): Promise<CorrectionIssue[]> => {
+    if (correction?.judgeEnabled === false) return [];
+    const judged = await judgeSceneContent(outline, candidate, aiCall, {
       grounding,
       logger: log,
     });
-    judgeSkipped = judged.skipped;
-    judgeIssues = judged.issues;
+    judgeSkipped = judgeSkipped && judged.skipped;
     if (!judged.skipped) attempts += 1;
-  }
+    // Accumulate every round (not just the latest) so false findings that
+    // triggered a repair stay visible for false-correction review.
+    allJudgeIssues.push(...judged.issues);
+    return judged.issues;
+  };
 
-  const allIssues = [...ruleIssues, ...judgeIssues];
   let content = initial;
   let repairs = 0;
-  let remaining = allIssues;
+  const allJudgeIssues: CorrectionIssue[] = [];
+  judgeIssues = await runJudge(initial);
+  let remaining = [...verifySceneContent(outline, initial, ruleContext).issues, ...judgeIssues];
+  const maxRepairs = correction?.maxRepairs ?? 1;
+  // Closed loop: every repair is re-verified AND re-judged, bounded by
+  // maxRepairs, so a repair that introduces a new factual error is caught
+  // instead of passing on rule-cleanliness alone.
   // PBL carries its own single-call retry inside the planner; the loop
   // verifies and reports PBL output but never replays the whole project.
-  if (allIssues.length > 0 && outline.type !== 'pbl') {
-    const repaired = await repairSceneContent({
-      initial,
-      issues: allIssues,
-      regenerate: (found) =>
-        runGenerationPass(outline, aiCall, options, buildRepairPrompt(found)),
-      verify: (candidate) => verifySceneContent(outline, candidate, ruleContext).issues,
-      maxRepairs: correction?.maxRepairs ?? 1,
-      logger: log,
-    });
-    content = repaired.content;
-    repairs = repaired.repairs;
-    remaining = repaired.remainingIssues;
+  while (remaining.length > 0 && repairs < maxRepairs && outline.type !== 'pbl') {
+    const next = await runGenerationPass(outline, aiCall, options, buildRepairPrompt(remaining));
+    if (next === null) {
+      log.warn('Correction repair regeneration failed; keeping previous content.');
+      break;
+    }
+    content = next;
+    repairs += 1;
+    attempts += 1;
+    const ruleNow = verifySceneContent(outline, next, ruleContext).issues;
+    judgeIssues = await runJudge(next);
+    remaining = [...ruleNow, ...judgeIssues];
   }
-  attempts += repairs;
 
   const gibberishRemains = remaining.some((issue) => issue.kind === 'gibberish-text');
   correction?.onCorrection?.({
     repaired: repairs > 0 && remaining.length === 0,
     attempts,
     ruleIssues: remaining,
-    judgeIssues,
+    judgeIssues: allJudgeIssues,
     judgeSkipped,
   });
   if (gibberishRemains) {
