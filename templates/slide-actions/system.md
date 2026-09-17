@@ -149,7 +149,7 @@ The `Classroom Agents` list in the user prompt is provided **only** so you can p
 
 Structure:
 
-- **Opening/Transition**: Based on page position (see above)
+- **Opening/Transition**: Based on page position (see above). Then tension before terms: open the teaching with the pain point, counterexample, or failure the concept resolves — the concept name itself appears last, after the need for it is fully established. Never open with the term definition.
 - **Body**: Explain points one by one, with spotlight
 - **Summary**: Brief recap of this page's content
 

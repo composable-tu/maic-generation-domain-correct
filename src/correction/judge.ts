@@ -41,7 +41,7 @@ function formatGlossary(glossary: Record<string, string> | undefined): string {
  * Fallback grounding synthesized from the caller's requirement text.
  * The host route already forwards `requirements` into every scene-content
  * call; when no explicit grounding arrives, the user's own words become
- * the minimal domain material instead of skipping the judge with nothing.
+ * the minimal domain material.
  */
 export function synthesizeGroundingFromRequirements(
   requirements?: UserRequirements,

@@ -10,6 +10,9 @@ describe("teaching voice wiring", () => {
     const snippet = loadSnippet("teaching-voice");
     expect(snippet.length).toBeGreaterThan(100);
     expect(snippet).toContain("not a reviewer");
+    expect(snippet).toContain("must name their object");
+    expect(snippet).toContain("Never replace concrete numbers");
+    expect(snippet).toContain("idealized-persona metaphors");
   });
 
   it("teaching_scenes_carry_the_voice", () => {
@@ -28,8 +31,7 @@ describe("teaching voice wiring", () => {
     }
   });
 
-  it("quiz_and_pbl_openings_stay_untouched", () => {
-    const quiz = buildPrompt(PROMPT_IDS.QUIZ_ACTIONS, {
+  it("quiz_and_pbl_openings_stay_untouched", () => {    const quiz = buildPrompt(PROMPT_IDS.QUIZ_ACTIONS, {
       title: "T",
       description: "D",
       keyPoints: "1. P",
@@ -51,5 +53,22 @@ describe("teaching voice wiring", () => {
     });
     expect(quiz?.system).not.toContain("not a reviewer");
     expect(pbl?.system).not.toContain("not a reviewer");
+  });
+});
+
+describe("tension-first opening", () => {
+  it("slide_actions_open_with_tension_and_name_terms_last", () => {
+    const prompts = buildPrompt(PROMPT_IDS.SLIDE_ACTIONS, {
+      title: "T",
+      description: "D",
+      keyPoints: "1. P",
+      elements: "[]",
+      courseContext: "",
+      agents: "",
+      userProfile: "",
+      languageDirective: "",
+    });
+    expect(prompts?.system).toContain("tension before terms");
+    expect(prompts?.system).toContain("Never open with the term definition");
   });
 });
