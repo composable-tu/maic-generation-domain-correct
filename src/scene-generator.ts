@@ -58,6 +58,7 @@ import { isAbortError } from './generation-retry.js';
 import { buildRepairPrompt, repairSceneContent } from './correction/repair.js';
 import { judgeSceneContent, synthesizeGroundingFromRequirements } from './correction/judge.js';
 import { verifySceneContent } from './correction/verify.js';
+import { verifySceneActions } from './correction/verify-actions.js';
 import type {
   CorrectionIssue,
   CorrectionOptions,
@@ -139,6 +140,11 @@ export interface SceneActionsOptions {
   agents?: AgentInfo[];
   userProfile?: string;
   languageDirective?: string;
+  /**
+   * Correction check for the produced actions (leaked internal ids).
+   * Report-only: actions are never regenerated. Absent = check with defaults.
+   */
+  correction?: CorrectionOptions;
   logger?: GenerationLogger;
 }
 
@@ -1747,9 +1753,40 @@ function buildPBLProjectSummary(outline: SceneOutline, project: PBLProject | und
 }
 
 /**
- * Step 3.2: Generate Actions based on content and script
+ * Step 3.2: Generate Actions based on content and script.
+ *
+ * The correction check runs by default (pure, zero model calls): narration
+ * is scanned for leaked internal ids and reported via `onCorrection`
+ * without altering the returned actions. `correction: { enabled: false }`
+ * skips the check.
  */
 export async function generateSceneActions(
+  outline: SceneOutline,
+  content:
+    | GeneratedSlideContent
+    | GeneratedQuizContent
+    | GeneratedInteractiveContent
+    | GeneratedPBLContent,
+  aiCall: AICallFn,
+  options: SceneActionsOptions = {},
+): Promise<Action[]> {
+  const actions = await generateSceneActionsOnce(outline, content, aiCall, options);
+  const correction = options.correction;
+  if (correction?.enabled === false) return actions;
+
+  const log = options.logger ?? noopGenerationLogger;
+  const report = verifySceneActions(outline, content, actions, { logger: log });
+  correction?.onCorrection?.({
+    repaired: false,
+    attempts: 0,
+    ruleIssues: report.issues,
+    judgeIssues: [],
+    judgeSkipped: true,
+  });
+  return actions;
+}
+
+async function generateSceneActionsOnce(
   outline: SceneOutline,
   content:
     | GeneratedSlideContent

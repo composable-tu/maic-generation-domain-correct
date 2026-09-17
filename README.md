@@ -24,7 +24,7 @@ git checkout v1.0.3
 {
   "pnpm": {
     "overrides": {
-      "@openmaic/generation": "npm:@composable-tu/maic-generation-domain-correct@0.0.2"
+      "@openmaic/generation": "npm:@composable-tu/maic-generation-domain-correct@x.y.z"
     }
   }
 }
@@ -47,7 +47,7 @@ pnpm install
 pnpm why @openmaic/generation
 ```
 
-`pnpm why` 应显示实际安装的是 `@composable-tu/maic-generation-domain-correct@0.0.2`。之后正常启动 OpenMAIC 即可；别名换上后纠偏环默认开启，无需改任何调用代码。如需关闭，调用时传 `correction: { enabled: false }` 即回到单遍生成。
+`pnpm why` 应显示实际安装的是 `@composable-tu/maic-generation-domain-correct@x.y.z`。之后正常启动 OpenMAIC 即可；别名换上后纠偏环默认开启，无需改任何调用代码。如需关闭，调用时传 `correction: { enabled: false }` 即回到单遍生成。
 
 纠偏环的工作方式：生成后先做规则校验（大纲要点覆盖、quiz 题数题型答案、悬空图片引用），再以领域材料做模型复核（`grounding.excerpts`；不传则自动用用户需求原文兜底，无材料时跳过），有问题则把缺口清单喂回模型返工（默认 1 次）。报告经 `onCorrection` 回调外传，修不好也返回最后内容，不转失败。
 

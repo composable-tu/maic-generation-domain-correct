@@ -129,6 +129,7 @@ function verifyQuiz(
   }
 
   const allowedTypes = config ? new Set(config.questionTypes.map(normalizeQuizType)) : null;
+  const seenQuestions = new Set<string>();
   questions.forEach((question, index) => {
     const label = `question ${index + 1} ("${question.id}")`;
     if (allowedTypes && !allowedTypes.has(normalizeQuizType(question.type))) {
@@ -147,6 +148,37 @@ function verifyQuiz(
         detail: `Quiz "${outline.title}" ${label} has no answer.`,
         location: question.id,
       });
+    } else if (
+      (question.type === 'single' || question.type === 'multiple') &&
+      Array.isArray(question.options) &&
+      question.options.length > 0 &&
+      Array.isArray(question.answer)
+    ) {
+      const valid = new Set<string>();
+      for (const option of question.options) {
+        if (typeof option?.value === 'string') valid.add(option.value);
+        if (typeof option?.label === 'string') valid.add(option.label);
+      }
+      const stray = question.answer.filter((entry) => typeof entry === 'string' && !valid.has(entry));
+      if (stray.length > 0) {
+        issues.push({
+          kind: 'quiz-answer-mismatch',
+          detail: `Quiz "${outline.title}" ${label} answers ${JSON.stringify(stray)} match no option.`,
+          location: question.id,
+        });
+      }
+    }
+    const normalizedQuestion = normalizeText(question.question ?? '');
+    if (normalizedQuestion) {
+      if (seenQuestions.has(normalizedQuestion)) {
+        issues.push({
+          kind: 'quiz-duplicate-question',
+          detail: `Quiz "${outline.title}" ${label} repeats an earlier question.`,
+          location: question.id,
+        });
+      } else {
+        seenQuestions.add(normalizedQuestion);
+      }
     }
   });
 }

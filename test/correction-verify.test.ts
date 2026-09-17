@@ -41,7 +41,7 @@ function singleQuestion(id: string, answer?: string[]) {
     id,
     type: "single" as const,
     question: "Who owns model routing?",
-    options: [{ label: "A", value: "The caller" }],
+    options: [{ label: "The caller", value: "A" }],
     ...(answer ? { answer } : {}),
   };
 }
@@ -94,7 +94,7 @@ describe("correction verify (rule layer, no model calls)", () => {
   });
 
   it("passes_matching_quiz", () => {
-    const content: GeneratedQuizContent = { questions: [singleQuestion("q1", ["a"])] };
+    const content: GeneratedQuizContent = { questions: [singleQuestion("q1", ["A"])] };
     const report = verifySceneContent(quizOutline(), content);
     expect(report.pass).toBe(true);
     expect(report.issues).toEqual([]);
@@ -102,7 +102,7 @@ describe("correction verify (rule layer, no model calls)", () => {
 
   it("flags_quiz_count_mismatch", () => {
     const content: GeneratedQuizContent = {
-      questions: [singleQuestion("q1", ["a"]), singleQuestion("q2", ["a"])],
+      questions: [singleQuestion("q1", ["A"]), singleQuestion("q2", ["A"])],
     };
     const report = verifySceneContent(quizOutline(), content);
     expect(report.pass).toBe(false);
@@ -111,7 +111,7 @@ describe("correction verify (rule layer, no model calls)", () => {
 
   it("flags_quiz_type_mismatch", () => {
     const content: GeneratedQuizContent = {
-      questions: [{ ...singleQuestion("q1", ["a"]), type: "multiple" as const }],
+      questions: [{ ...singleQuestion("q1", ["A"]), type: "multiple" as const }],
     };
     const report = verifySceneContent(quizOutline(), content);
     expect(report.pass).toBe(false);
@@ -123,6 +123,32 @@ describe("correction verify (rule layer, no model calls)", () => {
     const report = verifySceneContent(quizOutline(), content);
     expect(report.pass).toBe(false);
     expect(report.issues).toContainEqual(expect.objectContaining({ kind: "quiz-missing-answer" }));
+  });
+
+  it("flags_quiz_answer_mismatch", () => {
+    const content: GeneratedQuizContent = { questions: [singleQuestion("q1", ["Z"])] };
+    const report = verifySceneContent(quizOutline(), content);
+    expect(report.pass).toBe(false);
+    expect(report.issues).toContainEqual(
+      expect.objectContaining({ kind: "quiz-answer-mismatch" }),
+    );
+  });
+
+  it("flags_quiz_duplicate_question", () => {
+    const content: GeneratedQuizContent = {
+      questions: [
+        { ...singleQuestion("q1", ["A"]), id: "q1" },
+        { ...singleQuestion("q2", ["A"]), id: "q2", question: "Who owns model routing?" },
+      ],
+    };
+    const report = verifySceneContent(
+      { ...quizOutline(), quizConfig: { questionCount: 2, difficulty: "easy", questionTypes: ["single"] } },
+      content,
+    );
+    expect(report.pass).toBe(false);
+    expect(report.issues).toContainEqual(
+      expect.objectContaining({ kind: "quiz-duplicate-question", location: "q2" }),
+    );
   });
 
   it("passes_matching_interactive", () => {

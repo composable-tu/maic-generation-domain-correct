@@ -9,6 +9,9 @@ export type CorrectionIssueKind =
   | 'quiz-count-mismatch'
   | 'quiz-type-mismatch'
   | 'quiz-missing-answer'
+  | 'quiz-answer-mismatch'
+  | 'quiz-duplicate-question'
+  | 'leaked-element-id'
   | 'widget-mismatch'
   | 'pbl-not-runnable'
   | 'factual-deviation';
