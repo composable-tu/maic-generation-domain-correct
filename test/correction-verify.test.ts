@@ -173,4 +173,49 @@ describe("correction verify (rule layer, no model calls)", () => {
     expect(report.pass).toBe(false);
     expect(report.issues).toContainEqual(expect.objectContaining({ kind: "widget-mismatch" }));
   });
+
+  it("passes_reworded_figures_with_same_digits", () => {
+    const outline = {
+      ...slideOutline(),
+      keyPoints: ["液压站油温不得超过 60℃"],
+      mustCover: ["电机绕组温度不得超过 120℃"],
+    };
+    const content: GeneratedSlideContent = {
+      elements: [
+        textElement("t1", "Caller owns dependencies. Pure generation seam."),
+        textElement("t2", "液压站油温不得超过60度，电机绕组温度不得超过120度。"),
+      ],
+    };
+    const report = verifySceneContent(outline, content);
+    expect(report.pass).toBe(true);
+  });
+
+  it("passes_chinese_numerals_matching_arabic", () => {
+    const outline = {
+      ...slideOutline(),
+      keyPoints: ["Caller owns dependencies", "Pure generation seam"],
+      mustCover: ["无故缺课达三分之一，不予评定成绩。"],
+    };
+    const content: GeneratedSlideContent = {
+      elements: [
+        textElement("t1", "Caller owns dependencies. Pure generation seam."),
+        textElement("t2", "无故缺课达到 1/3，不予评定成绩。"),
+      ],
+    };
+    const report = verifySceneContent(outline, content);
+    expect(report.pass).toBe(true);
+  });
+
+  it("still_flags_figures_absent_from_content", () => {
+    const outline = {
+      ...slideOutline(),
+      mustCover: ["压力不得超过 5MPa。"],
+    };
+    const content: GeneratedSlideContent = {
+      elements: [textElement("t1", "Caller owns dependencies. Pure generation seam.")],
+    };
+    const report = verifySceneContent(outline, content);
+    expect(report.pass).toBe(false);
+    expect(report.issues).toContainEqual(expect.objectContaining({ kind: "missing-keypoint" }));
+  });
 });

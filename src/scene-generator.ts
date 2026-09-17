@@ -254,8 +254,11 @@ function buildWidgetOutline(
  * regeneration). The loop is on by default — plain alias swaps get the
  * correction with no caller change. `correction: { enabled: false }`
  * selects the bare single pass.
- * Correction never converts success into failure: worst case it returns
- * the initial content and reports the remaining issues via `onCorrection`.
+ * Correction never converts success into failure — with one exception:
+ * unreadable text (mojibake) that survives every repair returns null so the
+ * host routes the scene into its retry flow instead of showing garbage to
+ * learners. All other remaining issues return the last content with a report
+ * via `onCorrection`.
  */
 export async function generateSceneContent(
   outline: SceneOutline,
@@ -325,6 +328,7 @@ export async function generateSceneContent(
   }
   attempts += repairs;
 
+  const gibberishRemains = remaining.some((issue) => issue.kind === 'gibberish-text');
   correction?.onCorrection?.({
     repaired: repairs > 0 && remaining.length === 0,
     attempts,
@@ -332,6 +336,15 @@ export async function generateSceneContent(
     judgeIssues,
     judgeSkipped,
   });
+  if (gibberishRemains) {
+    // Unreadable text survived every repair: fail loud so the host routes
+    // the scene into its retry flow instead of showing mojibake to learners.
+    log.error(
+      `Scene "${outline.title}" still unreadable after ${repairs} repair(s); returning null.`,
+    );
+    options.onFailure?.({ code: 'invalid-model-output' });
+    return null;
+  }
   return content;
 }
 

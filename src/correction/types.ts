@@ -12,6 +12,7 @@ export type CorrectionIssueKind =
   | 'quiz-answer-mismatch'
   | 'quiz-duplicate-question'
   | 'leaked-element-id'
+  | 'gibberish-text'
   | 'widget-mismatch'
   | 'pbl-not-runnable'
   | 'factual-deviation';
