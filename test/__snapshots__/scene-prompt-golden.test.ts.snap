@@ -693,6 +693,8 @@ Description: Check the core idea.
 Test Points: 1. Injected collaborators
 Question Count: 1, Difficulty: easy, Question Types: single
 
+
+
 ## Language Directive
 Teach in English.
 
@@ -1629,6 +1631,10 @@ Output valid JSON only. No explanations, no code blocks, no additional text.",
 - **Key Points**:
   1. Caller owns dependencies
 2. Pure generation seam
+
+
+
+
 
 
 

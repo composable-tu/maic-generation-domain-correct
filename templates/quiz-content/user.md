@@ -2,6 +2,14 @@ Title: {{title}}
 Description: {{description}}
 Test Points: {{keyPoints}}
 Question Count: {{questionCount}}, Difficulty: {{difficulty}}, Question Types: {{questionTypes}}
+{{#if mustCover}}
+Must-Cover Propositions (test these exactly as stated):
+{{mustCover}}
+{{/if}}
+{{#if assessmentMap}}
+Question-to-Point Map (question N assesses the listed point):
+{{assessmentMap}}
+{{/if}}
 
 ## Language Directive
 {{languageDirective}}

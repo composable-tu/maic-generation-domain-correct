@@ -8,15 +8,23 @@ OpenMAIC 生成器流水线的领域纠偏改造。
 
 ## 改动说明
 
-相对原包，本包做两类改动，调用签名保持兼容。
+相对原包，本包做三类改动，调用签名保持兼容。
 
 ### 纠偏环
 
-`generateSceneContent` 返回前先校验再返工：规则校验（大纲要点覆盖、quiz 题数题型答案、悬空图片引用）→ 模型复核（以 `grounding.excerpts` 为依据，不传则自动用用户需求原文兜底，无材料时跳过）→ 缺口回填返工（默认 1 次）。`generateSceneActions` 做讲稿检查（内部 ID 泄漏进旁白即报），只报告不返工。报告经 `onCorrection` 回调外传；修不好也返回最后内容，不转失败。如需关闭，传 `correction: { enabled: false }`。
+`generateSceneContent` 返回前先校验再返工：规则校验（大纲要点覆盖、quiz 题数题型答案有效性、重复题目、悬空图片引用）→ 模型复核（以 `grounding.excerpts` 为依据，不传则自动用用户需求原文兜底，无材料时跳过）→ 缺口回填返工（默认 1 次）。`generateSceneActions` 做讲稿检查（内部 ID 泄漏进旁白即报），只报告不返工。报告经 `onCorrection` 回调外传；修不好也返回最后内容，不转失败。如需关闭，传 `correction: { enabled: false }`。
 
 ### 讲授口吻
 
-新增共享片段 `snippets/teaching-voice.md`，slide 与 interactive 的动作模板引用：讲授知识本身（每段至少一个具体命题）、导游句只允许开场一句、不点评材料本身（含工作量篇幅难易）、不压缩覆盖、禁总结总起句式与黑话。quiz 开场（防泄题）与 PBL 介绍保持原样。
+新增共享片段 `snippets/teaching-voice.md`，slide 与 interactive 的动作模板引用：讲授知识本身（每段至少一个具体命题）、导游句只允许开场一句、开场先摆痛点再出术语、不点评材料本身（含工作量篇幅难易）、不压缩覆盖、禁总结总起句式与黑话。quiz 开场（防泄题）与 PBL 介绍保持原样。
+
+### 大纲颗粒度
+
+大纲模板加拆页规则：一场景只讲 1-2 个要点（1-3 分钟），`keyPoints` 收紧到 2-4 条，5+ 要点的密主题必须拆成连续场景，禁止把不同机制、案例、步骤并进一页省页数。
+
+### 大纲即设计图
+
+`SceneOutline` 加可选设计字段：`teachingNarrative`（一句话叙事剧本）、`mustCover`（必讲命题原文）、`misconceptions`（误区与判据）、`exampleCase`、`transitionIn`、`assessmentMap`（quiz 各题考查点）。slide/quiz 的内容模板直接消费这些字段；L1 把 `mustCover` 纳入覆盖检查。字段全可选，旧大纲照常用。
 
 ## 使用方法
 

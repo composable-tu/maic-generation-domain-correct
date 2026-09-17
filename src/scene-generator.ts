@@ -824,10 +824,17 @@ async function generateSlideContent(
 
   const teacherContext = formatTeacherPersonaForPrompt(agents);
 
+  const mustCoverText = (outline.mustCover ?? []).map((p) => `- ${p}`).join('\n');
+  const misconceptionsText = (outline.misconceptions ?? []).map((p) => `- ${p}`).join('\n');
+
   const prompts = buildPrompt(PROMPT_IDS.SLIDE_CONTENT, {
     title: outline.title,
     description: outline.description,
     keyPoints: (outline.keyPoints || []).map((p, i) => `${i + 1}. ${p}`).join('\n'),
+    teachingNarrative: outline.teachingNarrative || '',
+    mustCover: mustCoverText,
+    misconceptions: misconceptionsText,
+    exampleCase: outline.exampleCase || '',
     elements: '（根据要点自动生成）',
     assignedImages: assignedImagesText,
     canvas_width: canvasWidth,
@@ -986,6 +993,10 @@ async function generateQuizContent(
     title: outline.title,
     description: outline.description,
     keyPoints: (outline.keyPoints || []).map((p, i) => `${i + 1}. ${p}`).join('\n'),
+    mustCover: (outline.mustCover ?? []).map((p) => `- ${p}`).join('\n'),
+    assessmentMap: (outline.assessmentMap ?? [])
+      .map((p, i) => `Q${i + 1}: ${p}`)
+      .join('\n'),
     questionCount: quizConfig.questionCount,
     difficulty: quizConfig.difficulty,
     questionTypes: quizConfig.questionTypes.join(', '),

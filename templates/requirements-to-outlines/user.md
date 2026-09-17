@@ -70,9 +70,13 @@ Never return a bare array. Never omit `languageDirective` or `courseTitle`. All 
   "title": "Scene Title",
   "description": "Teaching purpose description",
   "keyPoints": ["Point 1", "Point 2", "Point 3"],
+  "teachingNarrative": "Tension hook, aha turn, then the term name",
+  "mustCover": ["Concrete proposition with figures", "Standard or clause quoted verbatim"],
   "order": 1
 }
 ```
+
+Each outline is a detailed design blueprint: `teachingNarrative` and `mustCover` are required on every scene; add `misconceptions`, `exampleCase`, `transitionIn` when applicable, and `assessmentMap` on quiz scenes (one entry per question, in order).
 
 ### Special Notes
 
@@ -90,7 +94,7 @@ Never return a bare array. Never omit `languageDirective` or `courseTitle`. All 
 - **Interactive scenes**: If a concept benefits from hands-on simulation/visualization, use `"type": "interactive"` with `widgetType` and `widgetOutline` fields. Limit to 1-2 per course.
    - Select widgetType based on concept: simulation (physics/chem), diagram (processes), code (programming), game (practice), visualization3d (3D models)
    - Provide appropriate widgetOutline for the widget type
-- **Scene count**: Based on inferred duration, typically 1-2 scenes per minute
+- **Scene count**: Based on inferred duration, typically 1-2 scenes per minute. A dense topic with 5+ key points MUST become 2+ consecutive scenes — never compress it into one.
 - **Quiz placement**: Recommend inserting a quiz every 3-5 slides for assessment
 - **Language**: Infer from the user's requirement text and context, then output all content in the inferred language
 - **If web search results are provided**, reference specific findings and sources in scene descriptions and keyPoints. The search results provide up-to-date information — incorporate it to make the course content current and accurate. Write only the adopted conclusions; do not list discarded results.

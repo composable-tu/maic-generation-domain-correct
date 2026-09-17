@@ -69,7 +69,8 @@ function verifySlide(
   collectStrings(content.elements, strings);
   const corpus = normalizeText(strings.join('\n'));
 
-  for (const point of outline.keyPoints ?? []) {
+  const requiredPoints = [...(outline.keyPoints ?? []), ...(outline.mustCover ?? [])];
+  for (const point of requiredPoints) {
     const normalized = normalizeText(point);
     if (!normalized) continue;
     if (!corpus.includes(normalized)) {

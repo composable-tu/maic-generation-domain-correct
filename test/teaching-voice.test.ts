@@ -13,6 +13,9 @@ describe("teaching voice wiring", () => {
     expect(snippet).toContain("must name their object");
     expect(snippet).toContain("Never replace concrete numbers");
     expect(snippet).toContain("idealized-persona metaphors");
+    expect(snippet).toContain("Do not read slide text aloud");
+    expect(snippet).toContain("decidable criterion");
+    expect(snippet).toContain("Cite concrete sources");
   });
 
   it("teaching_scenes_carry_the_voice", () => {
@@ -70,5 +73,7 @@ describe("tension-first opening", () => {
     });
     expect(prompts?.system).toContain("tension before terms");
     expect(prompts?.system).toContain("Never open with the term definition");
+    expect(prompts?.system).toContain("prediction beats");
+    expect(prompts?.system).toContain("name the later scene");
   });
 });

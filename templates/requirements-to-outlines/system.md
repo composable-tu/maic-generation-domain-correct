@@ -73,6 +73,18 @@ Produce a **`courseTitle`** (required): a concise, human-readable name for the *
 - **Clear Purpose**: Each scene has a clear teaching function
 - **Logical Flow**: Scenes form a natural teaching progression
 - **Experience Design**: Consider learning experience and emotional response from the student's perspective
+- **One scene, one idea**: Each scene teaches 1-2 key points in 1-3 minutes. When a topic carries more points, split it into consecutive scenes with sequential titles instead of cramming. Never merge distinct mechanisms, cases, or steps into one scene to save pages.
+
+### Scene Blueprint Fields
+
+An outline is a detailed design blueprint, not a heading list. Every scene carries its teaching decisions so the content stage executes instead of inventing:
+
+- **teachingNarrative** (required): one-sentence narrative script — tension hook → aha turn → term naming.
+- **mustCover** (required): must-teach propositions quoted concretely (figures, standards, clauses from the material).
+- **misconceptions** (optional): anticipated misconceptions, each paired with its decidable criterion.
+- **exampleCase** (optional): the example or case this scene uses; prefer the course running example.
+- **transitionIn** (optional): handoff line from the previous scene (omit on the first scene).
+- **assessmentMap** (quiz only): which teaching point each question assesses, in question order.
 
 ---
 
@@ -261,6 +273,8 @@ Rules:
       "title": "Introduction",
       "description": "Welcome students and introduce the core concept.",
       "keyPoints": ["Context", "Agenda", "Goals"],
+      "teachingNarrative": "Open with the failure students already know, amplify it with one question, then name the concept that resolves it.",
+      "mustCover": ["The three agenda items in order"],
       "order": 1
     },
     {
@@ -301,7 +315,13 @@ Rules:
 | type              | string                   | ✅       | `"slide"`, `"quiz"`, `"interactive"`, or `"pbl"`                                                 |
 | title             | string                   | ✅       | Scene title, concise and clear                                                                   |
 | description       | string                   | ✅       | 1-2 sentences describing teaching purpose                                                        |
-| keyPoints         | string[]                 | ✅       | 3-5 core points                                                                                  |
+| keyPoints         | string[]                 | ✅       | 2-4 core points; a topic needing more becomes consecutive scenes, not a longer list |
+| teachingNarrative | string                   | ✅       | One-sentence narrative script (tension hook → aha turn → term naming)                |
+| mustCover         | string[]                 | ✅       | Must-teach propositions, quoted concretely                                          |
+| misconceptions    | string[]                 | ❌       | Anticipated misconceptions with decidable criteria                                  |
+| exampleCase       | string                   | ❌       | Example or case used by this scene                                                  |
+| transitionIn      | string                   | ❌       | Handoff line from the previous scene                                                |
+| assessmentMap     | string[]                 | ❌ (quiz) | Teaching point each question assesses, in order                                     |
 | teachingObjective | string                   | ❌       | Corresponding learning objective                                                                 |
 | estimatedDuration | number                   | ❌       | Estimated duration (seconds)                                                                     |
 | order             | number                   | ✅       | Sort order, starting from 1                                                                      |

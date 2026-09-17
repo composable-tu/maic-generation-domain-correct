@@ -66,7 +66,13 @@ export interface MediaGenerationRequest {
   style?: string;
 }
 
-/** A generation-ready description of one course scene. */
+/** A generation-ready description of one course scene.
+ *
+ * Beyond identification (title/description/keyPoints), an outline is a
+ * detailed design blueprint: the design fields below carry the teaching
+ * decisions Stage 2 executes instead of inventing. All design fields are
+ * optional so outlines from older producers keep working.
+ */
 export interface SceneOutline {
   id: string;
   type: 'slide' | 'quiz' | 'interactive' | 'pbl';
@@ -77,6 +83,18 @@ export interface SceneOutline {
   estimatedDuration?: number;
   order: number;
   languageNote?: string;
+  /** One-sentence narrative script: tension hook → aha turn → term naming. */
+  teachingNarrative?: string;
+  /** Must-teach propositions, quoted concretely (figures, standards, clauses). */
+  mustCover?: string[];
+  /** Anticipated misconceptions, each paired with its decidable criterion. */
+  misconceptions?: string[];
+  /** The example or case this scene uses (echoes the course running example). */
+  exampleCase?: string;
+  /** Handoff line from the previous scene. */
+  transitionIn?: string;
+  /** Quiz-only: which teaching points each question assesses, in order. */
+  assessmentMap?: string[];
   suggestedImageIds?: string[];
   mediaGenerations?: MediaGenerationRequest[];
   quizConfig?: {

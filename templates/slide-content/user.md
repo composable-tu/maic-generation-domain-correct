@@ -6,6 +6,22 @@
 - **Description**: {{description}}
 - **Key Points**:
   {{keyPoints}}
+{{#if teachingNarrative}}
+- **Teaching Narrative** (follow this arc):
+  {{teachingNarrative}}
+{{/if}}
+{{#if mustCover}}
+- **Must-Cover Propositions** (every item below must appear in the elements):
+  {{mustCover}}
+{{/if}}
+{{#if misconceptions}}
+- **Anticipated Misconceptions** (preempt each with its criterion):
+  {{misconceptions}}
+{{/if}}
+{{#if exampleCase}}
+- **Running Example** (use this case):
+  {{exampleCase}}
+{{/if}}
 
 {{teacherContext}}
 
