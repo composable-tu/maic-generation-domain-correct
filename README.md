@@ -134,3 +134,4 @@ pnpm why @openmaic/generation
 
 `pnpm why` 应显示实际安装的是 `@composable-tu/maic-generation-domain-correct@x.y.z`。之后正常启动 OpenMAIC 即可；别名换上后纠偏环默认开启，无需改任何调用代码。如需关闭，调用时传 `correction: { enabled: false }` 即回到单遍生成。
 
+> 也可以直接克隆 `composable-tu/OpenMAIC` 的（`domain-correct`）分支：https://github.com/composable-tu/OpenMAIC/tree/domain-correct
