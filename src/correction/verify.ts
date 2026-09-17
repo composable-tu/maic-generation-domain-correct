@@ -63,6 +63,11 @@ const CN_PLACES = new Set(['十', '百', '千', '万', '亿']);
  * Map Chinese numerals to Arabic ("三十五" → "35", "三分之一" → "3分之1").
  * Place characters are dropped, so large round forms ("两千" → "2") degrade
  * to short runs that match leniently — pass direction, same as no digits.
+ *
+ * Why this exists (real outline cases, not hypotheticals): "三分之一" vs
+ * "1/3", "不少于2人" vs "不少于两人", "3周" vs "三周". Without it every
+ * such pair false-triggers a paid repair call. Do not remove unless the
+ * digit-tolerant fallback goes with it.
  */
 function chineseNumeralsToArabic(text: string): string {
   let out = '';
