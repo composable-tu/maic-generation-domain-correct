@@ -27,7 +27,7 @@
     "dev": "tsc -p tsconfig.json --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
     "test": "vp test run",
-    "test:watch": "vp test",
+    "test:watch": "vp test watch",
     "prepublishOnly": "pnpm run build"
   },
   "keywords": [
