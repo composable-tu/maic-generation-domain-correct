@@ -1,16 +1,16 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from "vite-plus/test";
 
-import type { AICallFn, SceneContentFailure } from '@openmaic/generation';
-import { generateSceneContent } from '@openmaic/generation';
-import { pblOutline, quizOutline, slideOutline, widgetOutline } from './scene-fixtures.js';
+import type { AICallFn, SceneContentFailure } from "@openmaic/generation";
+import { generateSceneContent } from "@openmaic/generation";
+import { pblOutline, quizOutline, slideOutline, widgetOutline } from "./scene-fixtures.js";
 
-describe('scene content model-output failures', () => {
+describe("scene content model-output failures", () => {
   it.each([
-    ['slide', slideOutline, JSON.stringify({ background: { type: 'solid', color: '#fff' } })],
-    ['quiz', quizOutline, JSON.stringify({ question: 'not an array' })],
-    ['interactive', widgetOutline, 'INTERACTIVE_RAW_SENTINEL'],
+    ["slide", slideOutline, JSON.stringify({ background: { type: "solid", color: "#fff" } })],
+    ["quiz", quizOutline, JSON.stringify({ question: "not an array" })],
+    ["interactive", widgetOutline, "INTERACTIVE_RAW_SENTINEL"],
   ] as const)(
-    'reports invalid-model-output before returning null for malformed %s content',
+    "reports invalid-model-output before returning null for malformed %s content",
     async (_type, makeOutline, response) => {
       const aiCall: AICallFn = vi.fn(async () => response);
       const failures: SceneContentFailure[] = [];
@@ -20,18 +20,18 @@ describe('scene content model-output failures', () => {
       });
 
       expect(content).toBeNull();
-      expect(failures).toEqual([{ code: 'invalid-model-output' }]);
+      expect(failures).toEqual([{ code: "invalid-model-output" }]);
       expect(aiCall).toHaveBeenCalledTimes(1);
     },
   );
 
-  it('does not classify capability gates, PBL failures, or provider exceptions', async () => {
+  it("does not classify capability gates, PBL failures, or provider exceptions", async () => {
     const gateFailures: SceneContentFailure[] = [];
     const gateAiCall: AICallFn = vi.fn();
     const proceduralOutline = {
       ...widgetOutline(),
-      widgetType: 'procedural-skill' as const,
-      widgetOutline: { concept: 'Calibrate a device' },
+      widgetType: "procedural-skill" as const,
+      widgetOutline: { concept: "Calibrate a device" },
     };
 
     await expect(
@@ -47,11 +47,11 @@ describe('scene content model-output failures', () => {
       generateSceneContent(
         pblOutline(),
         async () => {
-          throw new Error('PBL_PROVIDER_SENTINEL');
+          throw new Error("PBL_PROVIDER_SENTINEL");
         },
         { onFailure: (failure) => pblFailures.push(failure) },
       ),
-    ).rejects.toMatchObject({ name: 'PBLGenerationError' });
+    ).rejects.toMatchObject({ name: "PBLGenerationError" });
     expect(pblFailures).toEqual([]);
 
     const providerFailures: SceneContentFailure[] = [];
@@ -59,11 +59,11 @@ describe('scene content model-output failures', () => {
       generateSceneContent(
         slideOutline(),
         async () => {
-          throw new Error('SLIDE_PROVIDER_SENTINEL');
+          throw new Error("SLIDE_PROVIDER_SENTINEL");
         },
         { onFailure: (failure) => providerFailures.push(failure) },
       ),
-    ).rejects.toThrow('SLIDE_PROVIDER_SENTINEL');
+    ).rejects.toThrow("SLIDE_PROVIDER_SENTINEL");
     expect(providerFailures).toEqual([]);
   });
 });

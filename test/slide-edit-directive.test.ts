@@ -8,16 +8,16 @@
  * unchanged (no EDIT MODE block) — a regression guard for the default
  * course-generation path.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vite-plus/test";
 
-import { generateSceneContent } from '@openmaic/generation';
-import type { AICallFn } from '@openmaic/generation';
-import type { SceneOutline, GeneratedSlideContent } from '@openmaic/generation';
+import { generateSceneContent } from "@openmaic/generation";
+import type { AICallFn } from "@openmaic/generation";
+import type { SceneOutline, GeneratedSlideContent } from "@openmaic/generation";
 
-const INSTRUCTION = '<<EDIT-INSTRUCTION-SENTINEL>> make it concise';
+const INSTRUCTION = "<<EDIT-INSTRUCTION-SENTINEL>> make it concise";
 
 function makeCapturingAiCall(response: string): { aiCall: AICallFn; lastUser: () => string } {
-  let lastUser = '';
+  let lastUser = "";
   const aiCall: AICallFn = async (_system, user) => {
     lastUser = user;
     return response;
@@ -27,11 +27,11 @@ function makeCapturingAiCall(response: string): { aiCall: AICallFn; lastUser: ()
 
 function slideOutline(overrides: Partial<SceneOutline> = {}): SceneOutline {
   return {
-    id: 'scene-1',
-    type: 'slide',
-    title: 'Test Scene',
-    description: 'A scene for testing edit-mode threading.',
-    keyPoints: ['point a', 'point b'],
+    id: "scene-1",
+    type: "slide",
+    title: "Test Scene",
+    description: "A scene for testing edit-mode threading.",
+    keyPoints: ["point a", "point b"],
     order: 0,
     ...overrides,
   };
@@ -40,26 +40,26 @@ function slideOutline(overrides: Partial<SceneOutline> = {}): SceneOutline {
 const BASELINE: GeneratedSlideContent = {
   elements: [
     {
-      id: 'text_baseline',
-      type: 'text',
+      id: "text_baseline",
+      type: "text",
       left: 0,
       top: 0,
       width: 100,
       height: 40,
-      content: '<p>BASELINE-ELEMENT-SENTINEL</p>',
-      defaultFontName: '',
-      defaultColor: '#000',
+      content: "<p>BASELINE-ELEMENT-SENTINEL</p>",
+      defaultFontName: "",
+      defaultColor: "#000",
       rotate: 0,
     },
   ],
   background: undefined,
-  remark: '',
+  remark: "",
 };
 
-describe('slide content edit-mode directive', () => {
-  it('threads editDirective + baselineContent into the slide content prompt', async () => {
+describe("slide content edit-mode directive", () => {
+  it("threads editDirective + baselineContent into the slide content prompt", async () => {
     const { aiCall, lastUser } = makeCapturingAiCall(
-      JSON.stringify({ elements: [], background: null, remark: '' }),
+      JSON.stringify({ elements: [], background: null, remark: "" }),
     );
 
     await generateSceneContent(slideOutline(), aiCall, {
@@ -67,57 +67,57 @@ describe('slide content edit-mode directive', () => {
       baselineContent: BASELINE,
     });
 
-    expect(lastUser()).toContain('EDIT MODE');
+    expect(lastUser()).toContain("EDIT MODE");
     expect(lastUser()).toContain(INSTRUCTION);
     // The baseline slide is serialized into the prompt so content-specific
     // instructions ("drop the 2nd bullet") operate on the real slide.
-    expect(lastUser()).toContain('BASELINE-ELEMENT-SENTINEL');
+    expect(lastUser()).toContain("BASELINE-ELEMENT-SENTINEL");
   });
 
-  it('leaves the slide content prompt unchanged when no editDirective is given', async () => {
+  it("leaves the slide content prompt unchanged when no editDirective is given", async () => {
     const { aiCall, lastUser } = makeCapturingAiCall(
-      JSON.stringify({ elements: [], background: null, remark: '' }),
+      JSON.stringify({ elements: [], background: null, remark: "" }),
     );
 
     await generateSceneContent(slideOutline(), aiCall, {});
 
-    expect(lastUser()).not.toContain('EDIT MODE');
+    expect(lastUser()).not.toContain("EDIT MODE");
   });
 
-  it('uses the baseline for a faithful re-render when no editDirective is given', async () => {
+  it("uses the baseline for a faithful re-render when no editDirective is given", async () => {
     const { aiCall, lastUser } = makeCapturingAiCall(
-      JSON.stringify({ elements: [], background: null, remark: '' }),
+      JSON.stringify({ elements: [], background: null, remark: "" }),
     );
 
     await generateSceneContent(slideOutline(), aiCall, { baselineContent: BASELINE });
 
     // A baseline alone (no instruction) must still enter EDIT MODE so the model
     // re-renders the existing slide rather than generating one from scratch.
-    expect(lastUser()).toContain('EDIT MODE');
-    expect(lastUser()).toContain('BASELINE-ELEMENT-SENTINEL');
-    expect(lastUser()).toContain('faithfully');
+    expect(lastUser()).toContain("EDIT MODE");
+    expect(lastUser()).toContain("BASELINE-ELEMENT-SENTINEL");
+    expect(lastUser()).toContain("faithfully");
   });
 
-  it('instructs the model to keep baseline images', async () => {
+  it("instructs the model to keep baseline images", async () => {
     const { aiCall, lastUser } = makeCapturingAiCall(
-      JSON.stringify({ elements: [], background: null, remark: '' }),
+      JSON.stringify({ elements: [], background: null, remark: "" }),
     );
 
     const baselineWithImage: GeneratedSlideContent = {
       elements: [
         {
-          id: 'img_1',
-          type: 'image',
+          id: "img_1",
+          type: "image",
           left: 0,
           top: 0,
           width: 100,
           height: 100,
-          src: 'https://example.com/i.png',
+          src: "https://example.com/i.png",
           rotate: 0,
         } as never,
       ],
       background: undefined,
-      remark: '',
+      remark: "",
     };
 
     await generateSceneContent(slideOutline(), aiCall, {
@@ -125,12 +125,12 @@ describe('slide content edit-mode directive', () => {
       baselineContent: baselineWithImage,
     });
 
-    expect(lastUser()).toContain('KEEP them');
+    expect(lastUser()).toContain("KEEP them");
   });
 
-  it('serializes the baseline plainly (no [omitted] strip; images flow as img_N id-refs)', async () => {
+  it("serializes the baseline plainly (no [omitted] strip; images flow as img_N id-refs)", async () => {
     const { aiCall, lastUser } = makeCapturingAiCall(
-      JSON.stringify({ elements: [], background: null, remark: '' }),
+      JSON.stringify({ elements: [], background: null, remark: "" }),
     );
 
     // The caller (regenerate_scene) lifts real image srcs into the resource
@@ -140,18 +140,18 @@ describe('slide content edit-mode directive', () => {
     const baselineWithIdRef: GeneratedSlideContent = {
       elements: [
         {
-          id: 'img_data',
-          type: 'image',
+          id: "img_data",
+          type: "image",
           left: 0,
           top: 0,
           width: 100,
           height: 100,
-          src: 'img_1',
+          src: "img_1",
           rotate: 0,
         } as never,
       ],
       background: undefined,
-      remark: '',
+      remark: "",
     };
 
     await generateSceneContent(slideOutline(), aiCall, {
@@ -161,11 +161,11 @@ describe('slide content edit-mode directive', () => {
 
     const prompt = lastUser();
     // No strip placeholder — the baseline is serialized plainly.
-    expect(prompt).not.toContain('[omitted]');
+    expect(prompt).not.toContain("[omitted]");
     // The id-ref is threaded into the prompt as-is.
     expect(prompt).toContain('"src":"img_1"');
     // An image element is present, so the KEEP-images rule applies.
     expect(prompt).toContain('"type":"image"');
-    expect(prompt).toContain('KEEP them');
+    expect(prompt).toContain("KEEP them");
   });
 });

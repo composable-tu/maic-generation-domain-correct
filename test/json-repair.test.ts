@@ -1,9 +1,9 @@
 // Behavior-parity port of tests/generation/json-repair.test.ts.
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vite-plus/test";
 
-import { parseJsonResponse } from '@openmaic/generation';
+import { parseJsonResponse } from "@openmaic/generation";
 
-describe('json-repair targeted fixes', () => {
+describe("json-repair targeted fixes", () => {
   it('repairs quoted key-value fragments such as "height: 76"', () => {
     const raw = `{
   "background": {
@@ -31,10 +31,10 @@ describe('json-repair targeted fixes', () => {
 
     expect(parsed).not.toBeNull();
     expect(parsed?.elements[0]?.height).toBe(76);
-    expect(parsed?.elements[0]?.content).toContain('age = 25');
+    expect(parsed?.elements[0]?.content).toContain("age = 25");
   });
 
-  it('repairs boolean property fragments without touching valid string values', () => {
+  it("repairs boolean property fragments without touching valid string values", () => {
     const raw = `{
   "elements": [
     {
@@ -53,10 +53,10 @@ describe('json-repair targeted fixes', () => {
     expect(parsed).not.toBeNull();
     expect(parsed?.elements[0]?.fixedRatio).toBe(false);
     expect(parsed?.elements[0]?.height).toBe(58);
-    expect(parsed?.elements[0]?.content).toBe('<p>literal text: height: 58</p>');
+    expect(parsed?.elements[0]?.content).toBe("<p>literal text: height: 58</p>");
   });
 
-  it('strips reasoning prefix ending with an unpaired closing think tag before JSON', () => {
+  it("strips reasoning prefix ending with an unpaired closing think tag before JSON", () => {
     const raw = `reasoning prose with {not json} and [not json] </think>
 {"ok": true}`;
 
@@ -65,7 +65,7 @@ describe('json-repair targeted fixes', () => {
     expect(parsed).toEqual({ ok: true });
   });
 
-  it('prefers the final payload after an unpaired closing tag with parseable draft JSON', () => {
+  it("prefers the final payload after an unpaired closing tag with parseable draft JSON", () => {
     const raw = `reasoning draft {"draft": true} </think>
 {"ok": true}`;
 
@@ -74,7 +74,7 @@ describe('json-repair targeted fixes', () => {
     expect(parsed).toEqual({ ok: true });
   });
 
-  it('prefers the final payload after a reasoning block with parseable draft JSON', () => {
+  it("prefers the final payload after a reasoning block with parseable draft JSON", () => {
     const raw = `<think>{"draft": true}</think>
 {"ok": true}`;
 
@@ -83,7 +83,7 @@ describe('json-repair targeted fixes', () => {
     expect(parsed).toEqual({ ok: true });
   });
 
-  it('prefers the final payload after a reasoning block with fenced draft JSON', () => {
+  it("prefers the final payload after a reasoning block with fenced draft JSON", () => {
     const raw = `<think>
 \`\`\`json
 {"draft": true}
@@ -96,11 +96,11 @@ describe('json-repair targeted fixes', () => {
     expect(parsed).toEqual({ ok: true });
   });
 
-  it('preserves literal think tags inside valid JSON strings', () => {
+  it("preserves literal think tags inside valid JSON strings", () => {
     const raw = '{"text":"literal <think>keep me</think>"}';
 
     const parsed = parseJsonResponse<{ text: string }>(raw);
 
-    expect(parsed).toEqual({ text: 'literal <think>keep me</think>' });
+    expect(parsed).toEqual({ text: "literal <think>keep me</think>" });
   });
 });

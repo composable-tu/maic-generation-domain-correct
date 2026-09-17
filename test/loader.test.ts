@@ -1,7 +1,7 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { describe, expect, test } from 'vitest';
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { describe, expect, test } from "vite-plus/test";
 import {
   PROMPT_IDS,
   buildPrompt,
@@ -9,125 +9,125 @@ import {
   loadPrompt,
   processConditionalBlocks,
   processSnippets,
-} from '@openmaic/generation';
+} from "@openmaic/generation";
 
 function createPromptsFixture(): string {
-  const promptsDir = mkdtempSync(join(tmpdir(), 'openmaic-generation-prompts-'));
-  mkdirSync(join(promptsDir, 'snippets'));
-  mkdirSync(join(promptsDir, 'templates'));
+  const promptsDir = mkdtempSync(join(tmpdir(), "openmaic-generation-prompts-"));
+  mkdirSync(join(promptsDir, "snippets"));
+  mkdirSync(join(promptsDir, "templates"));
   return promptsDir;
 }
 
-describe('loader semantics', () => {
-  test('loads and interpolates a known prompt', () => {
+describe("loader semantics", () => {
+  test("loads and interpolates a known prompt", () => {
     const result = buildPrompt(PROMPT_IDS.SLIDE_ACTIONS, {
-      title: 'Test Slide',
-      keyPoints: '1. point one',
-      description: 'desc',
-      elements: '[]',
-      courseContext: '',
-      agents: '',
-      userProfile: '',
-      languageDirective: 'en',
+      title: "Test Slide",
+      keyPoints: "1. point one",
+      description: "desc",
+      elements: "[]",
+      courseContext: "",
+      agents: "",
+      userProfile: "",
+      languageDirective: "en",
     });
 
     expect(result).not.toBeNull();
     expect(result!.system.length).toBeGreaterThan(100);
-    expect(result!.user).toContain('Test Slide');
+    expect(result!.user).toContain("Test Slide");
   });
 
-  test('defaults the project summary for the previous pbl-actions variable set', () => {
+  test("defaults the project summary for the previous pbl-actions variable set", () => {
     const result = buildPrompt(PROMPT_IDS.PBL_ACTIONS, {
-      title: 'Resilient Systems',
-      projectTopic: 'Retry handling',
-      projectDescription: 'Practice resilient generation',
-      keyPoints: '1. Classify failures',
-      description: 'Build a retry-aware workflow',
-      courseContext: '',
-      agents: '',
-      languageDirective: 'en',
+      title: "Resilient Systems",
+      projectTopic: "Retry handling",
+      projectDescription: "Practice resilient generation",
+      keyPoints: "1. Classify failures",
+      description: "Build a retry-aware workflow",
+      courseContext: "",
+      agents: "",
+      languageDirective: "en",
     });
 
     expect(result).not.toBeNull();
     expect(result!.system).toContain(
-      '(No generated milestones are available; introduce the project topic without inventing any.)',
+      "(No generated milestones are available; introduce the project topic without inventing any.)",
     );
     expect(`${result!.system}\n${result!.user}`).not.toMatch(/\{\{\w[\w-]*\}\}/);
   });
 
-  test('inlines a snippet exactly once', () => {
+  test("inlines a snippet exactly once", () => {
     const promptsDir = createPromptsFixture();
-    writeFileSync(join(promptsDir, 'snippets', 'example.md'), 'inlined content\n');
+    writeFileSync(join(promptsDir, "snippets", "example.md"), "inlined content\n");
 
-    expect(processSnippets('Before {{snippet:example}} after', promptsDir)).toBe(
-      'Before inlined content after',
+    expect(processSnippets("Before {{snippet:example}} after", promptsDir)).toBe(
+      "Before inlined content after",
     );
   });
 
-  test('returns null for an unknown prompt', () => {
+  test("returns null for an unknown prompt", () => {
     // @ts-expect-error -- exercise the runtime failure path.
-    expect(loadPrompt('does-not-exist')).toBeNull();
+    expect(loadPrompt("does-not-exist")).toBeNull();
   });
 
-  test('throws when a referenced snippet is missing', () => {
-    expect(() => processSnippets('{{snippet:does-not-exist}}')).toThrow(/Snippet not found/);
+  test("throws when a referenced snippet is missing", () => {
+    expect(() => processSnippets("{{snippet:does-not-exist}}")).toThrow(/Snippet not found/);
   });
 
-  test('does not recursively process snippet markers inside snippets', () => {
+  test("does not recursively process snippet markers inside snippets", () => {
     const promptsDir = createPromptsFixture();
-    writeFileSync(join(promptsDir, 'snippets', 'outer.md'), 'outer {{snippet:inner}}\n');
-    writeFileSync(join(promptsDir, 'snippets', 'inner.md'), 'inner\n');
+    writeFileSync(join(promptsDir, "snippets", "outer.md"), "outer {{snippet:inner}}\n");
+    writeFileSync(join(promptsDir, "snippets", "inner.md"), "inner\n");
 
-    expect(processSnippets('{{snippet:outer}}', promptsDir)).toBe('outer {{snippet:inner}}');
+    expect(processSnippets("{{snippet:outer}}", promptsDir)).toBe("outer {{snippet:inner}}");
   });
 
-  test('propagates a missing snippet referenced by user.md', () => {
+  test("propagates a missing snippet referenced by user.md", () => {
     const promptsDir = createPromptsFixture();
-    const promptDir = join(promptsDir, 'templates', 'fixture');
+    const promptDir = join(promptsDir, "templates", "fixture");
     mkdirSync(promptDir);
-    writeFileSync(join(promptDir, 'system.md'), 'system prompt\n');
-    writeFileSync(join(promptDir, 'user.md'), '{{snippet:not-packaged}}\n');
+    writeFileSync(join(promptDir, "system.md"), "system prompt\n");
+    writeFileSync(join(promptDir, "user.md"), "{{snippet:not-packaged}}\n");
 
     // @ts-expect-error -- fixture is intentionally outside the public PromptId union.
-    expect(() => loadPrompt('fixture', promptsDir)).toThrow(/Snippet not found: not-packaged/);
+    expect(() => loadPrompt("fixture", promptsDir)).toThrow(/Snippet not found: not-packaged/);
   });
 
-  test('keeps conditional content when its condition is truthy', () => {
-    expect(processConditionalBlocks('A {{#if enabled}}kept{{/if}} B', { enabled: true })).toBe(
-      'A kept B',
+  test("keeps conditional content when its condition is truthy", () => {
+    expect(processConditionalBlocks("A {{#if enabled}}kept{{/if}} B", { enabled: true })).toBe(
+      "A kept B",
     );
   });
 
-  test('drops conditional content when its condition is falsey', () => {
-    expect(processConditionalBlocks('A {{#if enabled}}dropped{{/if}} B', { enabled: false })).toBe(
-      'A  B',
+  test("drops conditional content when its condition is falsey", () => {
+    expect(processConditionalBlocks("A {{#if enabled}}dropped{{/if}} B", { enabled: false })).toBe(
+      "A  B",
     );
   });
 
-  test('does not recursively process nested conditional blocks', () => {
-    const template = '{{#if outer}}outer {{#if inner}}inner{{/if}}{{/if}}';
+  test("does not recursively process nested conditional blocks", () => {
+    const template = "{{#if outer}}outer {{#if inner}}inner{{/if}}{{/if}}";
     expect(processConditionalBlocks(template, { outer: true, inner: true })).toBe(
-      'outer {{#if inner}}inner{{/if}}',
+      "outer {{#if inner}}inner{{/if}}",
     );
   });
 
-  test('interpolates string variables', () => {
-    expect(interpolateVariables('Hello {{name}}', { name: 'Ada' })).toBe('Hello Ada');
+  test("interpolates string variables", () => {
+    expect(interpolateVariables("Hello {{name}}", { name: "Ada" })).toBe("Hello Ada");
   });
 
-  test('interpolates object variables as two-space JSON', () => {
-    expect(interpolateVariables('{{payload}}', { payload: { nested: true } })).toBe(
+  test("interpolates object variables as two-space JSON", () => {
+    expect(interpolateVariables("{{payload}}", { payload: { nested: true } })).toBe(
       '{\n  "nested": true\n}',
     );
   });
 
-  test('preserves placeholders whose variable is undefined', () => {
-    expect(interpolateVariables('{{missing}}', { missing: undefined })).toBe('{{missing}}');
+  test("preserves placeholders whose variable is undefined", () => {
+    expect(interpolateVariables("{{missing}}", { missing: undefined })).toBe("{{missing}}");
   });
 
-  test('leaves kebab-case placeholders untouched', () => {
-    expect(interpolateVariables('{{next-agent}}', { 'next-agent': 'ignored' })).toBe(
-      '{{next-agent}}',
+  test("leaves kebab-case placeholders untouched", () => {
+    expect(interpolateVariables("{{next-agent}}", { "next-agent": "ignored" })).toBe(
+      "{{next-agent}}",
     );
   });
 });

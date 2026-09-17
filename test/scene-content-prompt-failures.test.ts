@@ -1,21 +1,21 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from "vite-plus/test";
 
-import type { AICallFn } from '@openmaic/generation';
-import { generateSceneContent } from '@openmaic/generation';
-import { quizOutline, slideOutline, widgetOutline } from './scene-fixtures.js';
+import type { AICallFn } from "@openmaic/generation";
+import { generateSceneContent } from "@openmaic/generation";
+import { quizOutline, slideOutline, widgetOutline } from "./scene-fixtures.js";
 
-vi.mock('../src/prompts/index.js', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../src/prompts/index.js')>()),
+vi.mock("../src/prompts/index.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../src/prompts/index.js")>()),
   buildPrompt: vi.fn(() => null),
 }));
 
-describe('scene content prompt failures', () => {
+describe("scene content prompt failures", () => {
   it.each([
-    ['slide', slideOutline],
-    ['quiz', quizOutline],
-    ['interactive', widgetOutline],
+    ["slide", slideOutline],
+    ["quiz", quizOutline],
+    ["interactive", widgetOutline],
   ] as const)(
-    'reports prompt-unavailable before returning null for a %s prompt',
+    "reports prompt-unavailable before returning null for a %s prompt",
     async (_type, makeOutline) => {
       const aiCall: AICallFn = vi.fn();
       const failures: unknown[] = [];
@@ -25,7 +25,7 @@ describe('scene content prompt failures', () => {
       } as never);
 
       expect(content).toBeNull();
-      expect(failures).toEqual([{ code: 'prompt-unavailable' }]);
+      expect(failures).toEqual([{ code: "prompt-unavailable" }]);
       expect(aiCall).not.toHaveBeenCalled();
     },
   );

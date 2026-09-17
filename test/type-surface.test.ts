@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { expect, it } from "vite-plus/test";
 import type {
   BuildCompleteSceneOptions,
   GeneratedPBLContent,
@@ -7,7 +7,7 @@ import type {
   SceneContentFailure,
   SceneContentFailureCode,
   SceneContentOptions,
-} from '@openmaic/generation';
+} from "@openmaic/generation";
 
 type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
@@ -16,54 +16,54 @@ type Assert<T extends true> = T;
 type _SceneContentKeys = Assert<
   Equal<
     keyof SceneContentOptions,
-    | 'assignedImages'
-    | 'imageMapping'
-    | 'visionEnabled'
-    | 'generatedMediaMapping'
-    | 'resolvedVisionImages'
-    | 'agents'
-    | 'languageDirective'
-    | 'targetLanguage'
-    | 'userRequirements'
-    | 'allowProceduralSkill'
-    | 'editDirective'
-    | 'baselineContent'
-    | 'pblLoopFallback'
-    | 'onFailure'
-    | 'logger'
+    | "assignedImages"
+    | "imageMapping"
+    | "visionEnabled"
+    | "generatedMediaMapping"
+    | "resolvedVisionImages"
+    | "agents"
+    | "languageDirective"
+    | "targetLanguage"
+    | "userRequirements"
+    | "allowProceduralSkill"
+    | "editDirective"
+    | "baselineContent"
+    | "pblLoopFallback"
+    | "onFailure"
+    | "logger"
   >
 >;
 type _SceneActionKeys = Assert<
   Equal<
     keyof SceneActionsOptions,
-    'ctx' | 'agents' | 'userProfile' | 'languageDirective' | 'logger'
+    "ctx" | "agents" | "userProfile" | "languageDirective" | "logger"
   >
 >;
-type _BuildKeys = Assert<Equal<keyof BuildCompleteSceneOptions, 'sceneId'>>;
+type _BuildKeys = Assert<Equal<keyof BuildCompleteSceneOptions, "sceneId">>;
 type _PBLInputKeys = Assert<
   Equal<
     keyof PBLPlannerV2Input,
-    'outline' | 'courseContext' | 'user' | 'priorQuizResults' | 'targetLanguage'
+    "outline" | "courseContext" | "user" | "priorQuizResults" | "targetLanguage"
   >
 >;
 
-it('keeps new public option and generated-content surfaces narrow', () => {
+it("keeps new public option and generated-content surfaces narrow", () => {
   const contentOptions: SceneContentOptions = {};
-  const failureCode: SceneContentFailureCode = 'prompt-unavailable';
+  const failureCode: SceneContentFailureCode = "prompt-unavailable";
   const failure: SceneContentFailure = { code: failureCode };
   const actionOptions: SceneActionsOptions = {};
-  const buildOptions: BuildCompleteSceneOptions = { sceneId: 'stable' };
+  const buildOptions: BuildCompleteSceneOptions = { sceneId: "stable" };
 
   // Provider/model routing belongs inside the AICallFn closure.
   // @ts-expect-error languageModel is not a package scene-content option.
   const providerLeak: SceneContentOptions = { languageModel: {} };
   // @ts-expect-error projectV2 must satisfy the DSL-owned PBLProject contract.
-  const invalidPBL: GeneratedPBLContent = { projectV2: { title: 'incomplete' } };
+  const invalidPBL: GeneratedPBLContent = { projectV2: { title: "incomplete" } };
 
   expect(contentOptions).toEqual({});
-  expect(failure).toEqual({ code: 'prompt-unavailable' });
+  expect(failure).toEqual({ code: "prompt-unavailable" });
   expect(actionOptions).toEqual({});
-  expect(buildOptions.sceneId).toBe('stable');
+  expect(buildOptions.sceneId).toBe("stable");
   expect(providerLeak).toBeTruthy();
   expect(invalidPBL).toBeTruthy();
 });
