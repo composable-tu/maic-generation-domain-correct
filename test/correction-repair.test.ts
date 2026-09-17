@@ -18,6 +18,7 @@ describe("correction repair (bounded gap refill)", () => {
     expect(block).toContain("Pure generation seam");
     expect(block).toContain("2 questions");
     expect(block).toContain("Fix every one");
+    expect(block).toContain("Do not mention");
   });
 
   it("repairSceneContent_regenerates_until_rule_clean", async () => {

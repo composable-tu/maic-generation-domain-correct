@@ -14,3 +14,5 @@ Output a single JSON object, no prose:
 {"issues": [{"claim": "<exact claim from the content>", "reason": "<why the excerpts do not support it>"}]}
 
 When nothing is factually wrong, output {"issues": []}.
+
+Avoid false positives: report only claims with excerpt evidence against them. A claim the excerpts do not mention is not an issue unless the content presents it as sourced from the material. Never report style, layout, difficulty, or language as issues.

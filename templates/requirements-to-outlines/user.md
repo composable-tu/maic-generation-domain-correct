@@ -93,6 +93,6 @@ Never return a bare array. Never omit `languageDirective` or `courseTitle`. All 
 - **Scene count**: Based on inferred duration, typically 1-2 scenes per minute
 - **Quiz placement**: Recommend inserting a quiz every 3-5 slides for assessment
 - **Language**: Infer from the user's requirement text and context, then output all content in the inferred language
-- **If web search results are provided**, reference specific findings and sources in scene descriptions and keyPoints. The search results provide up-to-date information — incorporate it to make the course content current and accurate.
+- **If web search results are provided**, reference specific findings and sources in scene descriptions and keyPoints. The search results provide up-to-date information — incorporate it to make the course content current and accurate. Write only the adopted conclusions; do not list discarded results.
 
 **Final reminder**: your entire response must be a JSON **object** with exactly three top-level keys — `languageDirective` (string), `courseTitle` (string, ≤30 chars, in the teaching language), and `outlines` (array). Do not return a bare array. Do not wrap in prose or code fences.

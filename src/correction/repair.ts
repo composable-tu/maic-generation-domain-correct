@@ -31,7 +31,8 @@ export function buildRepairPrompt(issues: CorrectionIssue[]): string {
   const lines = issues.map((issue) => `- [${issue.kind}] ${issue.detail}`);
   return (
     `\n\nYour previous output had these problems:\n${lines.join('\n')}\n\n` +
-    `Fix every one of them and output the corrected single JSON object.`
+    `Fix every one of them and output the corrected single JSON object. ` +
+    `Do not mention the fixed problems anywhere in the content itself.`
   );
 }
 

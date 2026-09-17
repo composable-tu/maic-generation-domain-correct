@@ -19,7 +19,7 @@ You MUST output a JSON array directly. Each element is an object with a `type` f
     "name": "spotlight",
     "params": { "elementId": "text_abc123" }
   },
-  { "type": "text", "content": "First, let's look at the key concept..." },
+  { "type": "text", "content": "The core mechanism has three steps. First, ... [state the actual mechanism from the key points, then point at the visual]" },
   {
     "type": "action",
     "name": "spotlight",
@@ -27,7 +27,7 @@ You MUST output a JSON array directly. Each element is an object with a `type` f
   },
   {
     "type": "text",
-    "content": "Now observe this chart showing the relationship..."
+    "content": "The chart shows X causes Y: [state the conclusion the chart supports, with the numbers on it]..."
   }
 ]
 ```
@@ -120,6 +120,8 @@ Initiate classroom discussion, suitable for segments requiring student reflectio
 
 ## Design Requirements
 
+{{snippet:teaching-voice}}
+
 ### 1. Speech Content
 
 Generate natural teaching speech. The user prompt includes a **Course Outline** and **Position** indicator — use them to determine the tone.
@@ -133,11 +135,10 @@ Generate natural teaching speech. The user prompt includes a **Course Outline** 
 
 The `Classroom Agents` list in the user prompt is provided **only** so you can pick an `agentId` for a `discussion` action — those agents do **not** speak in your `text`. The teacher may ask the class an open rhetorical question (e.g. "What do you think happens next?"), but must never voice the answer or impersonate a student. If you want a specific student to respond, end the page with a `discussion` action instead of writing their reply yourself.
 
-**Speech is where all verbal content belongs.** The slide itself only shows concise bullet points and keywords — all elaboration, explanation, encouragement, transitional phrases, and teacher's remarks must appear here in speech text. For example:
+**Speech is where all verbal content belongs.** The slide itself only shows concise bullet points and keywords — all elaboration, explanation, encouragement, transitional phrases, and closing messages must appear here in speech text. Closing messages reflect on the lesson taught, never on the materials used. For example:
 - Detailed explanations of concepts shown as bullet points on the slide
 - Encouragements and motivational remarks (e.g., "Great job, everyone!")
 - Transitional phrases (e.g., "Now let's move on to…")
-- Closing messages and teacher's reflections
 
 **CRITICAL — Same-session continuity**: All pages belong to the **same class session** happening right now. This is NOT a series of separate classes.
 
