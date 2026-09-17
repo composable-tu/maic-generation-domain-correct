@@ -56,11 +56,15 @@ export interface CorrectionReport {
   judgeSkipped: boolean;
 }
 
-/** Knobs for the correction loop. Everything optional; zero-cost by default. */
+/** Knobs for the correction loop. The loop runs by default; this only tunes it. */
 export interface CorrectionOptions {
-  /** Master switch for the correction loop. Default true. False skips verification entirely. */
+  /** Master switch. False skips verification entirely (bare single pass). Default true. */
   enabled?: boolean;
-  /** Enable the model judge step. Default false. Requires grounding excerpts. */
+  /**
+   * Model judge step. False disables it; otherwise it runs whenever source
+   * excerpts exist (explicit grounding or the requirement-text fallback).
+   * Default unset = run when material is available.
+   */
   judgeEnabled?: boolean;
   /** Max repair generations after the initial one. Default 1. */
   maxRepairs?: number;

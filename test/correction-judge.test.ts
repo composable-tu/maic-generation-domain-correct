@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vite-plus/test";
 import {
   judgeSceneContent,
+  synthesizeGroundingFromRequirements,
   type AICallFn,
   type GeneratedSlideContent,
 } from "@openmaic/generation";
@@ -70,8 +71,7 @@ describe("correction judge (model review, one call max)", () => {
     expect(result.issues).toEqual([]);
   });
 
-  it("sends_outline_content_and_excerpts_to_the_judge", async () => {
-    let user = "";
+  it("sends_outline_content_and_excerpts_to_the_judge", async () => {    let user = "";
     const aiCall: AICallFn = async (_system, userPrompt) => {
       user = userPrompt;
       return JSON.stringify({ issues: [] });
@@ -86,5 +86,19 @@ describe("correction judge (model review, one call max)", () => {
     expect(user).toContain("Dependency Injection");
     expect(user).toContain("Caller owns dependencies.");
     expect(user).toContain("AICallFn");
+  });
+});
+
+describe("synthesizeGroundingFromRequirements", () => {
+  it("uses_the_requirement_text_as_minimal_domain_material", () => {
+    const grounding = synthesizeGroundingFromRequirements({
+      requirement: "Teach photovoltaic inverter maintenance.",
+    });
+    expect(grounding).toEqual({ excerpts: ["Teach photovoltaic inverter maintenance."] });
+  });
+
+  it("returns_undefined_without_requirement_text", () => {
+    expect(synthesizeGroundingFromRequirements(undefined)).toBeUndefined();
+    expect(synthesizeGroundingFromRequirements({ requirement: "   " })).toBeUndefined();
   });
 });

@@ -28,24 +28,33 @@ function quizResponse(count: number) {
 const COVERING_TEXT = "Caller owns dependencies. Pure generation seam.";
 
 describe("correction loop integration", () => {
-  it("callers_without_correction_options_see_identical_prompts_and_single_call", async () => {
-    const seenA: string[] = [];
-    const seenB: string[] = [];
-    const mkAiCall = (seen: string[]): AICallFn => async (system, user) => {
-      seen.push(`${system}\n${user}`);
-      return slideResponse(COVERING_TEXT);
-    };
-
-    await generateSceneContent(slideOutline(), mkAiCall(seenA));
-    await generateSceneContent(slideOutline(), mkAiCall(seenB), {
-      correction: { enabled: false },
-    });
-    expect(seenA).toEqual(seenB);
-
-    // Opt-in rule: no correction/grounding keys -> no extra model calls even on bad content.
+  it("disabled_correction_keeps_single_call", async () => {
+    // Opt-out: dirty content, still exactly one model call.
     const aiCall: AICallFn = vi.fn(async () => slideResponse("Only partial."));
-    await generateSceneContent(slideOutline(), aiCall);
+    await generateSceneContent(slideOutline(), aiCall, { correction: { enabled: false } });
     expect(aiCall).toHaveBeenCalledTimes(1);
+  });
+
+  it("clean_content_passes_through_with_single_call", async () => {
+    const aiCall: AICallFn = vi.fn(async () => slideResponse(COVERING_TEXT));
+    const content = await generateSceneContent(slideOutline(), aiCall);
+    expect(content).toMatchObject({ elements: expect.any(Array) });
+    expect(aiCall).toHaveBeenCalledTimes(1);
+  });
+
+  it("dirty_content_triggers_repair_by_default", async () => {
+    const aiCall = vi
+      .fn<AICallFn>()
+      .mockResolvedValueOnce(quizResponse(2))
+      .mockResolvedValue(quizResponse(1));
+
+    const content = (await generateSceneContent(quizOutline(), aiCall)) as
+      | GeneratedQuizContent
+      | null;
+
+    expect(content?.questions).toHaveLength(1);
+    expect(aiCall).toHaveBeenCalledTimes(2);
+    expect(aiCall.mock.calls[1][1]).toContain("had these problems");
   });
 
   it("repair_loop_fixes_quiz_count", async () => {
@@ -116,5 +125,26 @@ describe("correction loop integration", () => {
       ruleIssues: [],
       judgeSkipped: true,
     });
+  });
+
+  it("judge_falls_back_to_requirement_text_without_grounding", async () => {
+    let judgeUser = "";
+    const aiCall = vi
+      .fn<AICallFn>()
+      .mockResolvedValueOnce(slideResponse(COVERING_TEXT))
+      .mockImplementationOnce(async (_system, user) => {
+        judgeUser = user;
+        return JSON.stringify({ issues: [] });
+      });
+    const reports: CorrectionReport[] = [];
+
+    await generateSceneContent(slideOutline(), aiCall, {
+      userRequirements: { requirement: "Teach photovoltaic inverter maintenance." },
+      correction: { judgeEnabled: true, onCorrection: (r) => reports.push(r) },
+    });
+
+    expect(aiCall).toHaveBeenCalledTimes(2);
+    expect(judgeUser).toContain("Teach photovoltaic inverter maintenance.");
+    expect(reports[0]).toMatchObject({ judgeSkipped: false, judgeIssues: [] });
   });
 });

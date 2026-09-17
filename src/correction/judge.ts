@@ -9,7 +9,7 @@
 
 import { parseJsonResponse } from '../json-repair.js';
 import { noopGenerationLogger, type GenerationLogger } from '../logger.js';
-import type { SceneOutline } from '../outline-types.js';
+import type { SceneOutline, UserRequirements } from '../outline-types.js';
 import type { AICallFn } from '../pipeline-types.js';
 import { buildPrompt, PROMPT_IDS } from '../prompts/index.js';
 import type { CorrectionIssue, SourceGrounding } from './types.js';
@@ -35,6 +35,20 @@ function formatGlossary(glossary: Record<string, string> | undefined): string {
   return Object.entries(glossary)
     .map(([term, definition]) => `- ${term}: ${definition}`)
     .join('\n');
+}
+
+/**
+ * Fallback grounding synthesized from the caller's requirement text.
+ * The host route already forwards `requirements` into every scene-content
+ * call; when no explicit grounding arrives, the user's own words become
+ * the minimal domain material instead of skipping the judge with nothing.
+ */
+export function synthesizeGroundingFromRequirements(
+  requirements?: UserRequirements,
+): SourceGrounding | undefined {
+  const requirement = requirements?.requirement?.trim();
+  if (!requirement) return undefined;
+  return { excerpts: [requirement] };
 }
 
 /**

@@ -25,7 +25,7 @@ describe("scene generation primitives", () => {
             top: 60,
             width: 840,
             height: 100,
-            content: "Dependency injection",
+            content: "Caller owns dependencies. Pure generation seam.",
           },
         ],
         background: { type: "solid", color: "#ffffff" },
@@ -34,7 +34,12 @@ describe("scene generation primitives", () => {
 
     const content = await generateSceneContent(slideOutline(), aiCall);
     expect(content).toMatchObject({
-      elements: [expect.objectContaining({ type: "text", content: "Dependency injection" })],
+      elements: [
+        expect.objectContaining({
+          type: "text",
+          content: "Caller owns dependencies. Pure generation seam.",
+        }),
+      ],
       background: { type: "solid", color: "#ffffff" },
     });
     expect(aiCall).toHaveBeenCalledTimes(1);

@@ -56,7 +56,7 @@ import type {
 import { noopGenerationLogger, type GenerationLogger } from './logger.js';
 import { isAbortError } from './generation-retry.js';
 import { buildRepairPrompt, repairSceneContent } from './correction/repair.js';
-import { judgeSceneContent } from './correction/judge.js';
+import { judgeSceneContent, synthesizeGroundingFromRequirements } from './correction/judge.js';
 import { verifySceneContent } from './correction/verify.js';
 import type {
   CorrectionIssue,
@@ -124,11 +124,11 @@ export interface SceneContentOptions {
   pblLoopFallback?: (input: PBLPlannerV2Input) => Promise<PBLProject>;
   /**
    * Domain material the correction loop may consult (excerpts, glossary,
-   * domain instructions). Absent = outline-only checks. Passing it (or
-   * `correction`) activates the correction loop.
+   * domain instructions). Absent, the loop falls back to the requirement
+   * text the host already forwards, then to outline-only checks.
    */
   grounding?: SourceGrounding;
-  /** Knobs for the correction loop. Absent = single-pass generation without verification. */
+  /** Knobs for the correction loop. Absent = loop with default settings. */
   correction?: CorrectionOptions;
   onFailure?: (failure: SceneContentFailure) => void;
   logger?: GenerationLogger;
@@ -243,11 +243,11 @@ function buildWidgetOutline(
 /**
  * Generate scene content with the correction loop.
  *
- * Runs one generation pass, then — only when the caller passes
- * `correction` or `grounding` — verifies (rule layer), optionally judges
- * (model review against excerpts), and repairs (bounded regeneration).
- * Without the new options the prompts and return contract match an
- * uncorrected call exactly.
+ * Runs one generation pass, then verifies (rule layer), judges (model
+ * review against excerpts when material exists), and repairs (bounded
+ * regeneration). The loop is on by default — plain alias swaps get the
+ * correction with no caller change. `correction: { enabled: false }`
+ * selects the bare single pass.
  * Correction never converts success into failure: worst case it returns
  * the initial content and reports the remaining issues via `onCorrection`.
  */
@@ -263,8 +263,9 @@ export async function generateSceneContent(
   | null
 > {
   const correction = options.correction;
-  const loopActive =
-    correction?.enabled !== false && (correction !== undefined || options.grounding !== undefined);
+  // Out-of-the-box correction: the loop runs unless explicitly disabled.
+  // Callers that need the bare single pass opt out with `correction: { enabled: false }`.
+  const loopActive = correction?.enabled !== false;
 
   const initial = await runGenerationPass(outline, aiCall, options);
   if (!loopActive || !initial) return initial;
@@ -280,9 +281,17 @@ export async function generateSceneContent(
   let judgeIssues: CorrectionIssue[] = [];
   let judgeSkipped = true;
   let attempts = 1;
-  if (correction?.judgeEnabled) {
+  // Explicit grounding wins; otherwise fall back to the requirement text the
+  // host already forwards, so the judge has domain material without any
+  // host-side change.
+  const grounding =
+    options.grounding ?? synthesizeGroundingFromRequirements(options.userRequirements);
+  // The judge runs whenever it has material to check against, unless
+  // explicitly disabled. `judgeSceneContent` itself skips (zero calls) when
+  // no excerpts exist, so callers without domain material pay nothing.
+  if (correction?.judgeEnabled !== false) {
     const judged = await judgeSceneContent(outline, initial, aiCall, {
-      grounding: options.grounding,
+      grounding,
       logger: log,
     });
     judgeSkipped = judged.skipped;

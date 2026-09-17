@@ -15,7 +15,9 @@ it("pins representative system and user prompts for every scene kind", async () 
   const capture =
     (kind: string, response: string): AICallFn =>
     async (system, user) => {
-      captured[kind] = { system, user };
+      // Pin the first-generation prompt: the correction loop may follow up
+      // with repair calls, but the representative prompt is the first pass.
+      captured[kind] ??= { system, user };
       return response;
     };
 

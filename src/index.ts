@@ -92,7 +92,7 @@ export { parseJsonResponse } from './json-repair.js';
 export type { JsonParsingOptions } from './json-repair.js';
 export { verifySceneContent } from './correction/verify.js';
 export type { VerifySceneContentOptions, VerifiableContent } from './correction/verify.js';
-export { judgeSceneContent } from './correction/judge.js';
+export { judgeSceneContent, synthesizeGroundingFromRequirements } from './correction/judge.js';
 export type { JudgeSceneContentOptions, JudgeSceneContentResult } from './correction/judge.js';
 export { buildRepairPrompt, repairSceneContent } from './correction/repair.js';
 export type { RepairSceneContentArgs, RepairSceneContentResult } from './correction/repair.js';
