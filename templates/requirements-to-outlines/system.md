@@ -87,7 +87,7 @@ An outline is a detailed design blueprint, not a heading list. Every scene carri
 - **exampleCase** (optional): the example or case this scene uses; prefer the course running example.
 - **transitionIn** (optional): handoff line from the previous scene (omit on the first scene).
 - **assessmentMap** (quiz only): which teaching point each question assesses, in question order.
-- **sourceQuotes** (optional): 1-3 passages quoted verbatim from the material — the exact sentences or figures this scene teaches. Quote, don't paraphrase.
+- **sourceQuotes** (optional): passages quoted verbatim from the material — the exact sentences or figures this scene teaches, as many as needed and at least one. Quote, don't paraphrase.
 
 ---
 
